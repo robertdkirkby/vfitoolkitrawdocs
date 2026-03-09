@@ -1,0 +1,183 @@
+\begin{thebibliography}{28}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Andrews et~al.(2017)Andrews, Gentzkow, and
+  Shapiro]{AndrewsGentzkowShapiro2017}
+Isaiah Andrews, Matthew Gentzkow, and Jesse Shapiro.
+\newblock Measuring the sensitivity of parameter estimates to estimation
+  moments.
+\newblock \emph{Quarterly Journalk of Economics}, 132(4), 2017.
+\newblock \doi{https://doi.org/10.1093/qje/qjx023}.
+
+\bibitem[Boppart and Krusell(2020)]{BoppartKrusell2020}
+Timo Boppart and Per Krusell.
+\newblock Labor supply in the past, present, and future: A balanced-growth
+  perspective.
+\newblock \emph{Journal of Political Economy}, 128(1), 2020.
+\newblock \doi{https://doi.org/10.1086/704071}.
+
+\bibitem[Carroll(2021)]{Carroll2021}
+Christopher Carroll.
+\newblock Theoretical foundations of buffer stock saving.
+\newblock \emph{Quantitative Economics}, Forthcoming:\penalty0 AAA, 2021.
+
+\bibitem[Carroll et~al.(2020)Carroll, Crawley, Slacalek, Tokuoka, and
+  White]{CarrollCrawleySlacalekTokuokaWhite2020}
+Christopher Carroll, Edmund Crawley, Jiri Slacalek, Kiichi Tokuoka, and Matthew
+  White.
+\newblock Sticky expectations and consumption dynamics.
+\newblock \emph{American Economic Journal: Macroeconomics}, 12(3):\penalty0
+  40--76, 2020.
+
+\bibitem[Civales et~al.(2017)Civales, Diez-Catalan, and
+  Fazilet]{CivalesDiezCatalanFazilet2017}
+Simone Civales, Luis Diez-Catalan, and Fatih Fazilet.
+\newblock Discretizing a process with non-zero skewness and high kurtosis.
+\newblock \emph{Unpublished manuscript}, 1:\penalty0 1, 2017.
+
+\bibitem[Cordoba and Ripoll(2017)]{CordobaRipoll2017}
+Juan~Carlos Cordoba and Marla Ripoll.
+\newblock Risk aversion and the value of life.
+\newblock \emph{Review of Economic Studies}, 84, 2017.
+\newblock \doi{https://doi.org/10.1093/restud/rdw053}.
+
+\bibitem[Epstein and Zin(1989)]{EpsteinZin1989}
+Larry~G. Epstein and Stanley~E. Zin.
+\newblock Substitution, risk aversion, and the temporal behavior of consumption
+  and asset returns: A theoretical framework.
+\newblock \emph{Econometrica}, 57(4):\penalty0 937–969, 1989.
+
+\bibitem[Farmer and Toda(2017)]{FarmerToda2017}
+Leland~E. Farmer and Alexis~Akira Toda.
+\newblock Discretizing nonlinear, non‐gaussian markov processes with exact
+  conditional moments.
+\newblock \emph{Quantitative Economics}, 8(2):\penalty0 651--683, 2017.
+
+\bibitem[Fella et~al.(2019)Fella, Gallipoli, and Pan]{FellaGallipoliPan2019}
+Giulio Fella, Giovanni Gallipoli, and Jutong Pan.
+\newblock Markov-chain approximations for life-cycle models.
+\newblock \emph{Review of Economic Dynamics}, 34:\penalty0 183--201, 2019.
+
+\bibitem[Gilboa and Schmeidler(1989)]{GilboaSchmeidler1989}
+Itzhak Gilboa and David Schmeidler.
+\newblock Maxmin expected utility with non-unique prior.
+\newblock \emph{Journal of Mathematical Economics}, 18(2), 1989.
+\newblock \doi{https://doi.org/10.1016/0304-4068(89)90018-9}.
+
+\bibitem[Grossman et~al.(2017)Grossman, Helpman, Oberfield, and
+  Sampson]{GrossmanHelpmanOberfieldSampson2017}
+Gene~M. Grossman, Elhanan Helpman, Ezra Oberfield, and Thomas Sampson.
+\newblock Balanced growth despite uzawa.
+\newblock \emph{American Economic Review}, 107:\penalty0 4, 2017.
+
+\bibitem[Guvenen et~al.(2021)Guvenen, Karahan, Ozkan, and
+  Song]{GuvenenKarahanOzkanSong2021}
+Fatih Guvenen, Fatih Karahan, Serdar Ozkan, and Jae Song.
+\newblock What do data on millions of u.s. workers say about lifecycle labor
+  income risk?
+\newblock \emph{Econometrica}, 89(5):\penalty0 2303--2339, 2021.
+\newblock \doi{https://doi.org/10.3982/ECTA14603}.
+
+\bibitem[Ilut and Schneider(2023)]{IlutSchneider2023}
+Cosmin Ilut and Martin Schneider.
+\newblock Modeling uncertainty as ambiguity: a review.
+\newblock In Topa Bachmann and Klaauw, editors, \emph{Handbook of Economic
+  Expectations}, chapter Part 4, Chapter 24. Elsevier, 2023 edition, 2023.
+
+\bibitem[Imrohoroglu(1989)]{Imrohoroglu1989}
+Ayse Imrohoroglu.
+\newblock Cost of business cycles with indivisibilities and liquidity
+  constraints.
+\newblock \emph{Journal of Political Economy}, 97(6):\penalty0 1368--1383,
+  1989.
+
+\bibitem[Jorgensen(2023)]{Jorgensen2023}
+Thomas Jorgensen.
+\newblock Sensitivity to calibrated parameters.
+\newblock \emph{Review of Economics and Statistics}, 105(2), 2023.
+\newblock \doi{https://doi.org/10.1162/rest_a_01054}.
+
+\bibitem[Kopecky and Suen(2010)]{KopeckySuen2010}
+Karen Kopecky and Richard Suen.
+\newblock Finite state markov-chain approximations to highly persistent
+  processes.
+\newblock \emph{Review of Economic Dynamics}, 13(3):\penalty0 701--714, 2010.
+
+\bibitem[Kraft et~al.(2022)Kraft, Munk, and Weiss]{KraftMunkWeiss2022}
+Holger Kraft, Claus Munk, and Farina Weiss.
+\newblock Bequest motives in consumption-portfolio decisions with recursive
+  utility.
+\newblock \emph{Journal of Banking and Finance}, 138, 2022.
+\newblock \doi{https://doi.org/10.1016/j.jbankfin.2022.106428}.
+
+\bibitem[Laibson(1997)]{Laibson1997}
+David Laibson.
+\newblock Golden eggs and hyperbolic discounting.
+\newblock \emph{Quarterly Journal of Economics}, 112(2):\penalty0 443--478,
+  1997.
+\newblock \doi{https://doi.org/10.1162/003355397555253}.
+
+\bibitem[Ma\'ckowiak and Wiederholt(2015)]{MackowiakWiederholt2015}
+Bartosz Ma\'ckowiak and Mirko Wiederholt.
+\newblock Business cycle dynamics under rational inattention.
+\newblock \emph{Review of Economic Studies}, 82(4):\penalty0 1502–1532, 2015.
+\newblock \doi{https://doi.org/10.1093/restud/rdv027}.
+
+\bibitem[Ortigueira and Siassi(2013)]{OrtigueiraSiassi2013}
+Salvador Ortigueira and Nawid Siassi.
+\newblock How important is intra-household risk sharing for savings and labor
+  supply?
+\newblock \emph{Journal of Monetary Economics}, 2013.
+\newblock \doi{https://doi.org/10.1016/j.jmoneco.2013.05.007}.
+
+\bibitem[P\'al and Stachurski(2013)]{PalStachurski2013}
+Jeno P\'al and John Stachurski.
+\newblock Fitted value function iteration with probability one contractions.
+\newblock \emph{Journal of Economic Dynamics and Control}, 37:\penalty0
+  251--264, 2013.
+
+\bibitem[Pijoan-Mas(2006)]{PijoanMas2006}
+Josep Pijoan-Mas.
+\newblock Precautionary savings or working longer hours?
+\newblock \emph{Review of Economic Dynamics}, 9(2):\penalty0 326--352, 2006.
+
+\bibitem[Rouwenhorst(1995)]{Rouwenhorst1995}
+G.~Rouwenhorst.
+\newblock Asset pricing implications of equilibrium business cycle models.
+\newblock In Cooley T., editor, \emph{Frontiers of Business Cycle Research},
+  chapter~10. Princeton University Press, 1995.
+
+\bibitem[Swanson(2012)]{Swanson2012}
+Eric Swanson.
+\newblock Risk aversion and the labor margin in dynamic equilibrium models.
+\newblock \emph{American Economic Review}, 102(4):\penalty0 1663--91, 2012.
+
+\bibitem[Swanson(2018)]{Swanson2018}
+Eric Swanson.
+\newblock Risk aversion, risk premia, and the labor margin with generalized
+  recursive preferences.
+\newblock \emph{Review of Economic Dynamics}, 29:\penalty0 290--321, 2018.
+
+\bibitem[Tanaka and Toda(2013)]{TanakaToda2013}
+Kenichiro Tanaka and Alexis~Akira Toda.
+\newblock Discrete approximations of continuous distributions by maximum
+  entropy.
+\newblock \emph{Economics Letters}, 118(3):\penalty0 445--450, 2013.
+
+\bibitem[Tauchen(1986)]{Tauchen1986}
+George Tauchen.
+\newblock Finite state markov-chain approximations to univariate and vector
+  autoregressions.
+\newblock \emph{Economics Letters}, 20:\penalty0 177--181, 1986.
+
+\bibitem[Tauchen and Hussey(1991)]{TauchenHussey1991}
+George Tauchen and Robert Hussey.
+\newblock Quadrature-based methods for obtaining approximate solutions to
+  nonlinear asset pricing models.
+\newblock \emph{Econometrica}, 59(2):\penalty0 371--396, 1991.
+
+\end{thebibliography}

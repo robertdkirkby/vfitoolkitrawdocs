@@ -1,0 +1,46 @@
+This is BibTeX, Version 0.99d (TeX Live 2023/Debian)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: LifeCycleModels.aux
+The style file: plainnat.bst
+Database file #1: /home/kmarshallbanana/Dropbox/RDKbiblio.bib
+You've used 28 entries,
+            2773 wiz_defined-function locations,
+            795 strings with 9966 characters,
+and the built_in function-call counts, 11913 in all, are:
+= -- 1077
+> -- 600
+< -- 23
++ -- 205
+- -- 177
+* -- 903
+:= -- 1879
+add.period$ -- 96
+call.type$ -- 28
+change.case$ -- 143
+chr.to.int$ -- 28
+cite$ -- 56
+duplicate$ -- 570
+empty$ -- 1035
+format.name$ -- 229
+if$ -- 2514
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 28
+newline$ -- 158
+num.names$ -- 116
+pop$ -- 238
+preamble$ -- 1
+purify$ -- 114
+quote$ -- 0
+skip$ -- 424
+stack$ -- 0
+substring$ -- 431
+swap$ -- 30
+text.length$ -- 2
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 308
+warning$ -- 0
+while$ -- 105
+width$ -- 0
+write$ -- 393
