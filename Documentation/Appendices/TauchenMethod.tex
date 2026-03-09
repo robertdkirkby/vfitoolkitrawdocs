@@ -1,0 +1,60 @@
+The toolkit contains a couple of functions for generating the grids and transition matrices for exogenous variables based on the Tauchen Method for
+discrete state space approximations of VARs. The main command $TauchenMethod$ is for creating the approximation directly from the parameters of an AR(1),
+and this is now described.
+
+The Toolkit also includes commands $TauchenMethodVAR$ for approximation (quadrature) of a VAR(1), and $RouwenhorstMethod$ which provides an alternative 
+approximations of AR(1) processes that outperforms the Tauchen method when the autocorrelation coefficient (referred to below as $\rho$) takes a value
+near one.
+
+
+\noindent Namely,
+\begin{itemize}
+%  \item \textit{TauchenMethod\_{}Data}: Generates a markov chain approximation from the time series input (uses Tauchen method to approximate an AR(1) process
+%       estimated from that time series).
+ \item \textit{TauchenMethod}: Generates a markov chain approximation for AR(1) process defined by the inputed parameters.
+\end{itemize}
+
+% Since the quality of the approximation depends on 'q', one thing you can do is use \textit{MarkovChainMoments (undocumented)} to check how closely the Markov process generated
+% by the Tauchen method approximates the parameters you used to generate it (note: should you so wish you could even search across q's to find the one that 
+% gives the best approximation, in terms of matching the three parameters, given the number of states you are using).
+
+\subsection{TauchenMethod}
+To create a discrete state space approximation of the AR(1) process,
+\begin{equation} \label{eqn:ar1}
+ z_t =\mu +\rho z_{t-1} +\epsilon_t \quad \epsilon_t \sim^{iid} N(0,\sigma^2)
+\end{equation}
+the command is, \\
+\indent \textcolor{RoyalBlue}{[z\_{}grid, pi\_{}z]=TauchenMethod(mu,sigmasq,rho,znum,q, [tauchenoptions]);}
+the outputs are the grid of discretized values ($z\_{}grid$) and the transition matrix ($pi\_{}z$). 
+We now describe in more detail the inputs and outputs.
+
+\subsubsection{Inputs and Outputs}
+The inputs are
+\begin{itemize}
+ \item Define the constant, autocorrelation, and error variance terms relating to equation \ref{eqn:ar1}, eg. \\
+    \textcolor{RoyalBlue}{mu=1; rho=0.9; sigmasq=0.09;}
+ \item Set the number of points to use for the approximation, \\
+    \textcolor{RoyalBlue}{znum = 9;} \\
+    (When using the value function iteration commands, $znum$ will correspond to $n\_{}z$ whenever it is the only shock.)
+ \item Set $q$, roughly q defines the number of standard deviations of $z$ covered by the range of discrete points, \\
+   \textcolor{RoyalBlue}{q = 3;}
+\end{itemize}
+the optional input is $tauchenoptions$
+\begin{itemize}
+ \item Can either not parallelize (\textcolor{RoyalBlue}{tauchenoptions.parallel=0}), or parallelize on graphics card \\ (\textcolor{RoyalBlue}{tauchenoptions.parallel=2}).
+    (If you set \textcolor{RoyalBlue}{tauchenoptions.parallel=1} it will just act as if you set a value of zero, as parallelizing on CPU does not appear to help at all)
+\end{itemize}
+The outputs are,
+\begin{itemize}
+ \item The discrete grid (of $znum$ points). A column vector. \\
+    \textcolor{RoyalBlue}{z\_{}grid}
+ \item The transition matrix; the element in row $i$, column $j$ gives the probability of moving to state $j$ tomorrow, given that today is state $i$, \\
+    \textcolor{RoyalBlue}{pi\_{}z} \\
+    (each row sums to one; size is $znum$-by-$znum$)
+\end{itemize}
+
+
+
+
+
+

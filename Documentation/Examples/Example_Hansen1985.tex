@@ -1,0 +1,39 @@
+%\documentclass[DiscStateSpaceToolkit.tex]{subfiles} 
+%\begin{document}
+
+\cite{Hansen1985} is an early paper in the RBC literature. At the time it was important for introducing the extensive margin of labour --- working
+or not working --- into models (which it did via a trick of using loteries, so that in the aggregate it was back to just being a continuous choice,
+and because utility was now quasi-linear the implied Frisch elasticity is infinity; highly unrealistic). Thanks to computational and modelling advances we can now
+model both the extensive and intensive margins of labour supply\footnote{The extensive margin is the decision to work or not work, the intensive margin is, 
+having decided to work, how many hours to work.} explicitly, and without the need for (highly unrealistic) lotteries, so the model
+of \cite{Hansen1985} is no longer empirically useful. It retains historical interest and while now outdated it also provides us with a chance to look
+at how the Toolkit output can be used to generate some of the kinds of model statistics that are standard in the literature.
+
+The value function problem to be solved is,
+\begin{equation*}
+ V(k,z)=\sup_{k',l} \, \{ log(c)+B l+\beta*E[V(k',z')|z] \}
+\end{equation*}
+subject to
+\begin{eqnarray}
+ & c+i= exp(z) k^{\theta} l^{1-\theta} \\
+ & k'=(1-\delta)k+i \\
+ & z'=\rho z +\epsilon' \quad ,\epsilon \overset{iid}{\sim} N(0,\sigma_{\epsilon}^2)
+\end{eqnarray}
+where $k$ is physical capital, $i$ is investment, $c$ is consumption, $l$ is aggregate labour supply (for the individual household it represents
+the probability of working; see \cite{Hansen1985}), $z$ is a productivity shock that follows an AR(1) process; 
+$exp(z) k^{\alpha} l^{1-\theta}$ is the production function, $\delta$ is the depreciation rate.
+
+
+The following code solves this model, using parallelization on GPU, and draws a graph of the value function; it contains many comments describing what is being done
+at each step. This code is a copy of $Hansen1985.m$ which you can run and modify to get a better feel for how
+to use the toolkit. Below that is the code that defines the return function, $Hansen1985\_{}ReturnFn.m$.
+
+\textbf{Contents of Hansen1985.m}
+\lstinputlisting[language=Matlab]{./Examples/MatlabCodes/Hansen1985.m}
+
+\smallskip
+
+\textbf{Contents of Hansen1985$\_{}$ReturnFn.m}
+\lstinputlisting[language=Matlab]{./Examples/MatlabCodes/Hansen1985_ReturnFn.m}
+
+%\end{document}

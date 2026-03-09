@@ -1,0 +1,60 @@
+Once you solve the Value Function Iteration problem and get the optimal policy function, $Policy$, you can use the $StationaryDist\_{}Case1$ (or $Case2$) command
+to calculate the stationary distribution (over the endogenous and exogenous states). $StationaryDist\_{}Case1$ essentially works by automatically calling two
+sub-commands in order.
+The first is $StationaryDist\_{}Case1\_{}Simulation$ (and $Case2$) and is based on simulating an individual for
+multiple time periods and then aggregating this across time (like a simulated estimation of the empirical cdf).The second \\ $StationaryDist\_{}Case1\_{}Iteration$ (and $Case2$)
+is based on iterating directly on the agents distribution until it converges.\footnote{By default the simulation is done on parallel CPUs, and the iteration on the GPU. This combination
+appears to be the best for speed.} In practice a good combination of speed and accuracy often comes from
+using $StationaryDist\_{}Case1\_{}Simulation$ to generate a starting guess, which can then be used as an input to $StationaryDist\_{}Case1$ to get an accurate answer;
+the method followed by default when using $StationaryDist\_{}Case1$. The main weakness of this approach is that \\ $StationaryDist\_{}Case1\_{}Iteration$ is very memory intensive and so is
+often not usable with larger grids. More details on these sub-commands, which can easily be called directly, can be found in Appendix \ref{appendix:StationaryDist}
+
+All of the inputs required will already have been created either by running the VFI command, or because they were themselves required as an
+input in the VFI command.
+
+\subsection{Inputs and Outputs}
+To use the toolkit to solve problems of this sort the following steps must first be completed.
+\begin{itemize}
+ \item You will need the optimal policy function, $Policy$, as outputed by the VFI commands. \\
+    \textcolor{RoyalBlue}{Policy}
+ \item Define $n\_{}a$, $n\_{}z$, and $n\_{}d$. You will already have done this to be able to run the VFI command.
+ \item Create the transition matrices, $pi\_{}z$ for the exogenous $z$ variables. Again you will already have done this to be able to run the VFI command.
+\end{itemize}
+
+That covers all of the objects that must be created, the only thing left to do is simply call the value function iteration code and let it do it's thing. \\
+\textcolor{RoyalBlue}{StationaryDist=StationaryDist\_{}Case1(Policy,n\_{}d,n\_{}a,n\_{}z,pi\_{}z, [simoptions]);}
+
+The outputs are
+\begin{itemize}
+ \item $StationaryDist$: The steady state distribution evaluated on the grid (ie. on $a \times z$). It will be a matrix of size $[n_a,n_z]$ and at each point
+    it will be the value of the probability distribution function evaluated at the corresponding point $(a,z)$.
+\end{itemize}
+
+\subsection{Some further remarks}
+\begin{itemize}
+ \item A description of the sub-commands $StationaryDist\_{}Case1\_{}Simulation$ and \\ $StationaryDist\_{}Case1\_{}Iteration$ can be found in appendix
+\end{itemize}
+
+\subsection{Options}
+Optionally you can also input a further argument, a structure called \textit{simoptions}, which allows you to set various internal options. Perhaps
+the most important of these is \textit{simoptions.parallel} which can be used get the codes to run on the GPU (see the examples).
+Following is a list of the \textit{simoptions}, the values to which they are being set in this list are their default values.
+\begin{itemize}
+  \item Define the starting (seed) point for each simulation. \\
+    \textcolor{RoyalBlue}{simoptions.seedpoint=[ceil(N\_{}a/2),ceil(N\_{}z/2)];}
+  \item Decide how many periods the simulation should run for. \\
+    \textcolor{RoyalBlue}{simoptions.simperiods=10\^{}4;}
+  \item Decide for how many periods the simulation should perform a burnin from the seed point before the 'simperiods' begins. \\
+    \textcolor{RoyalBlue}{simoptions.burnin=10\^{}3;}
+  \item If you want to parallelize the code on the GPU set to two, parallelize on CPU set to one, single core on CPU set as zero \\
+    \textcolor{RoyalBlue}{simoptions.parallel=0;} \\
+    (Each simulation will be $simperiods$/$ncores$ long, and each will begin from $seedpoint$ and have a burnin of $burnin$ periods.)
+  \item If you want feedback set to one, else set to zero \\
+    \textcolor{RoyalBlue}{simoptions.verbose=0} \\
+      (Feedback includes some on the run times of various parts of the code)
+  \item If you are using parallel CPUs you need to tell it how many cores you have. \\
+    \textcolor{RoyalBlue}{simoptions.ncores=1;}
+  \item You can turn off the iteration by setting $simoptions.iterate=0$, in this case only simulation is used.
+    \textcolor{RoyalBlue}{simoptions.iterate=1;}
+\end{itemize}
+

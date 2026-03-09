@@ -1,0 +1,94 @@
+ 
+The command \textit{TransitionPath\_{}Case1} (and \textit{\_{}Case2}) allows for easy calculation of the path of the price (vector) associated with the general equilibrium transition path of
+a standard Bewley-Huggett-Aiyagari models.\footnote{General equilibrium incomplete market heterogeneous agent models with idiosyncratic, but no aggregate, shocks.}
+
+As well as the standard inputs required for the general equilibrium command the other inputs needed are related to the (series of) parameter changes to be evaluated, including the final value function
+and the initial stationary agents distribution.
+
+The algorithm is based on the standard shooting algorithm approach to computing general equilibrium transition paths in heterogeneous agent models of the Bewley-Huggett-Aiyagari type.
+
+%
+% In the notation of the toolkit this is any problem for which the competitive equilibrium can be written as
+% \begin{definition}
+% A \textit{Competitive Equilibrium} is an agents value function $V_{p}$; agents policy function $g$;
+% vector of prices $p$; measure of agents $\mu_{p}$;
+% such that
+% \begin{enumerate}
+%  \item Given prices $p$, the agents value function $V_p$ and policy function $g_p$ solve the agents problem
+%    given by a Case 1 value function (as described in Section \ref{sec:VFI_Case1}).
+%  \item Aggregates are determined by individual actions: $B_p=\mathcal{A}(\mu_p)$.
+%  \item Markets clear (in terms of prices): $\lambda(B_p,p)=0$.
+%  \item The measure of agents is invariant:
+%       \begin{equation}
+%           \mu_p(a,z)=\int \int \left[ \int 1_{a=g^{a'}_p(\hat{a},z)}\mu_p(\hat{a},z) Q(z,dz')\right] d\hat{a}dz
+%       \end{equation}
+% \end{enumerate}
+% \end{definition}
+% the $p$ subscripts denote that these objects depend on the price(s) $p$.
+
+\subsection{Preparing the model}
+To use the toolkit to solve problems of this sort the following steps must first be made.
+\begin{enumerate}
+ \item Many of the inputs are exactly the same as those used to compute the final general equilibrium with the $HeteroAgentStationaryEqm\_{}Case1$ command
+   and the exact same notation applies (see Section \ref{sec:BHAmodel_GE}). \\
+    (Namely \textcolor{RoyalBlue}{n\_{}d, n\_{}a, n\_{}z, d\_{}grid, a\_{}grid, z\_{}grid, pi\_{}z,} \\
+    \indent \textcolor{RoyalBlue}{ReturnFn, FnsToEvaluate, GeneralEqmEqns, Parameters, DiscountFactorParamNames,} \\
+    \indent \textcolor{RoyalBlue}{ReturnFnParamNames, FnsToEvaluateParamNames, GeneralEqmEqnParamNames, PriceParamNames,})
+ \item Define the number of time periods which you are allowing for the transition path. \\
+    \textcolor{RoyalBlue}{T=100;}
+ \item Define the names of any of the parameters that change over the path. \\
+   \textcolor{RoyalBlue}{ParamPathNames=\{'alpha'\};} \\
+   (All other parameters are assumed to remain constant at their initial values.)
+ \item Define the path of the parameters for which you want to calculate the transition. \\
+    \textcolor{RoyalBlue}{ParamPath=0.4*ones(T,1);} \\
+    (If you just want a one off unannounced change then this will simply be the final parameter values for T-periods. See 'Some Further Remarks' below for more complex transition paths.)
+  \item Define the names of the prices that make up the path. \\
+   \textcolor{RoyalBlue}{PricePathName=\{'r'\};} \\
+   (This will almost always be the same as PriceParamNames.)
+  \item Define an initial guess for the price path. The final price value (at period $T$) \textit{must} be that associated with the final general equilibrium.  \\
+   \textcolor{RoyalBlue}{PricePath0=linspace(0.04,0.03,T);} \\
+   (eg., from initial price to final price.)
+  \item Give the initial agent distribution (often, but not necessarily, the stationary distribution associated with initial parameters).
+   \textcolor{RoyalBlue}{StationaryDist\_{}init}
+  \item Give the final value function (you must calculate this beforehand, see example codes).
+   \textcolor{RoyalBlue}{V\_{}final}
+\end{enumerate}
+That covers all of the objects that must be created, the only thing left to do is simply call the heterogeneous agent general equilbrium code. \\
+\textcolor{RoyalBlue}{[PricePathNew] =} \\
+\indent \textcolor{RoyalBlue}{  TransitionPath\_{}Case1(PricePath0, PricePathNames, ParamPath, ParamPathNames, T, V\_{}final, StationaryDist\_{}init, } \\
+\indent \indent \textcolor{RoyalBlue}{   n\_{}d, n\_{}a, n\_{}z, pi\_{}z, d\_{}grid,a\_{}grid,z\_{}grid, )} \\
+\indent \indent \textcolor{RoyalBlue}{   ReturnFn, FnsToEvaluate, GeneralEqmEqns, Parameters, DiscountFactorParamNames, } \\
+\indent \indent \textcolor{RoyalBlue}{   ReturnFnParamNames, FnsToEvaluateParamNames, GeneralEqmEqnParamNames, PriceParamNames,} \\
+\indent \indent \textcolor{RoyalBlue}{   [transpathoptions]);}
+
+Once run $PricePathNew$ will contain the general equilibrium transition path for prices.
+
+\subsection{Some further remarks}
+\begin{itemize}
+ \item The $Case2$ command is the same, except that you also need to input \textcolor{RoyalBlue}{$Phi\_{}aprimeKron$} and \textcolor{RoyalBlue}{$Case2\_{}Type$}
+   in exactly the same way as for the $ValueFnIter\_{}Case2$ command.
+ \item The command can solve for the transition path for any finite-length sequence of parameter changes that are announced at time 0. This includes one-off unannounced
+   changes (set the entire parameter path equal to the final parameter value), one-off preannounced changes (set the parameter path equal to the initial parameter values
+   for the first few periods, then to the final parameter values from then on), or even a whole series of preannounced changes (set the parameter path equal to the series
+   of changes, then to the final parameter values from then on).
+ \item It is important to check that the choice of $T$ is large enough to ensure convergence (ie., that the tail of the parameter path has been at the final parameter values
+   long enough). The codes return the price path with the final value forced to remain at whatever was set in the initial price path. One can therefore informally check if $T$ is long enough simply
+   by comparing the period $T-1$ price with the period $T$ price (the $T-1$ price should have already converged to the $T$ price). More formally one should check that the agent distribution
+   and value function themselves have converged to the final general equilibrium values (and not just the prices), and that the result is invariant to increasing $T$.
+\end{itemize}
+
+\subsection{Options}
+Options relating to computing the transition path can be passed in \textit{transpathoptions} and include, with their default values,
+\begin{itemize}
+ \item $transpathoptions.tolerance=10$\^{}$(-5);$ Sets the convergence criterion for the general eqm price path.
+ \item $transpathoptions.parallel=2;$ Default is to use the gpu.
+ \item $transpathoptions.exoticpreferences=0;$ Not yet implemented for transition path. Will be used to implement quasi-hyperbolic discounting and epstein-zin preferences.
+ \item $transpathoptions.oldpathweight=0.9;$ Determines the weights used to update the price path. (Must be between 0 and 1.)
+ \item $transpathoptions.weightscheme=1;$ Determines the weighting scheme used to update the price path.
+ \item $transpathoptions.maxiterations=1000;$ If a general eqm price path has not been found within this number of iterations then command will simply terminate.
+ \item $transpathoptions.verbose=0;$ If set to 1 then command will print regular output on progress.
+\end{itemize}
+
+\subsection{Examples}
+See the example based on finding the transition path for a change in the capital share of output (the parameter in the production function) in the model of Aiyagari (1994) \\
+\href{https://github.com/vfitoolkit/VFItoolkit-matlab-examples/tree/master/HeterogeneousAgentModels}{github.com/vfitoolkit/VFItoolkit-matlab-examples/tree/master/HeterogeneousAgentModels}

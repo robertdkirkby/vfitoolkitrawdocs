@@ -1,0 +1,39 @@
+%\documentclass[DiscStateSpaceToolkit.tex]{subfiles} 
+%\begin{document}
+ 
+The Neoclassical Growth Model was first developed in \cite{BrockMirman1972}, although our treatment of the model here is based
+on \cite{DiazGimenez2001}. If you are unfamiliar with the model a full description can be found in Section 2.2 of 
+\cite{DiazGimenez2001}; he also briefly discusses the relation to the social planners problem, how the problem looks in both sequential and 
+recursive formulation, and how we know that value function iteration will give us the correct solution. In what follows I assume you
+are familiar with these issues and simply give the value function problem. Our concentration here is on how to solve this problem 
+using the toolkit.
+
+The value function problem to be solved is,
+\begin{equation*}
+ V(k,z)=\sup_{k'} \, \{ \frac{c^{1-\gamma}}{1-\gamma}+\beta*E[V(k',z')|z] \}
+\end{equation*}
+subject to
+\begin{eqnarray}
+ & c+i=exp(z) k^{\alpha} \\
+ & k'=(1-\delta)k+i \\
+ & z'=\rho z +\epsilon' \quad ,\epsilon \overset{iid}{\sim} N(0,\sigma_{\epsilon}^2)
+\end{eqnarray}
+where $k$ is physical capital, $i$ is investment, $c$ is consumption, $z$ is a productivity shock that follows an AR(1) process; 
+$exp(z) k^{\alpha}$ is the production function, $\delta$ is the depreciation rate.
+
+We will use the \href{appendix:TauchenMethod}{Tauchen Method} to discretize the AR(1) shock.
+
+You can find a copy of the codes at \href{https://github.com/vfitoolkit/VFItoolkit-matlab-examples}{github.com/vfitoolkit/VFItoolkit-matlab-examples}
+
+The code $StochasticNeoClassicalGrowthModel.m$ solves this model, using parallelization on GPU, and draws a graph of the value function; it contains many comments describing what is being done
+at each step and uses $StochasticNeoClassicalGrowthModel_ReturnFn$ which implements the return function.
+% 
+% \textbf{Contents of StochasticNeoClassicalGrowthModel.m}
+% \lstinputlisting[language=Matlab]{./Examples/MatlabCodes/StochasticNeoClassicalGrowthModel.m}
+% 
+% \smallskip
+% 
+% \textbf{Contents of StochasticNeoClassicalGrowthModel$\_{}$ReturnFn.m}
+% \lstinputlisting[language=Matlab]{./Examples/MatlabCodes/StochasticNeoClassicalGrowthModel_ReturnFn.m}
+
+%\end{document}

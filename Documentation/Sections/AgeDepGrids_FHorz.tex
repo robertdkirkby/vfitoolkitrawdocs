@@ -1,0 +1,81 @@
+Some Finite-Horizon value function problems involve solving different problems at each age. The VFI toolkit handles this with 'age-dependent grids'. As an example, suppose each household lives for three periods. When young they make decisions on whether to go to university. When middle-age they make decisions on how many hours to work and how much to save. When retired they make decisions on how much to save. Clearly the problem, and the number of state variables, changes with age. The age dependent grids allows these problems to be easily solved, and not just the value function problem, but also all the other standard OLG codes such as finding the stationary agents distribution, computing the general equilibrium, and simulating panel data, model statistics, and life-cycle profiles.\footnote{Simulated panel data, model statistics, and life-cycle profiles should be treated with care, as depending on how the model is set up the age-dependent problems may mean that some 'variables' change meaning depending on age. This is discussed in more detail below.}
+
+The following explantion largely assumes that you know how to set up an OLG model \textit{without} age-dependent grids, as explained in Section \ref{sec:VFI_Case1_FHorz}.
+
+Actually using the age-dependent grids is done using the existing command relevant command \textcolor{RoyalBlue}{ValueFnIter\_{}Case2\_{}FHorz}, but the inputs that are passed for the grids and transition matrix are slightly different, and it is important to use \textcolor{RoyalBlue}{vfoptions.agedependentgrids} as explained below. The relevant command is thus \\
+\textcolor{RoyalBlue}{[V,Policy] = ValueFnIter\_{}Case2\_{}FHorz(n\_{}d, n\_{}a, n\_{}z, N\_{}j, d\_{}gridfn, a\_{}gridfn, z\_{}gridfn, } \\
+\indent \indent \textcolor{RoyalBlue}{AgeDepGridsParamNames, ReturnFn, Parameters, DiscountFactorParamNames,} \\
+\indent \indent \textcolor{RoyalBlue}{ReturnFnParamNames, vfoptions);} \\
+This section describes the problem it solves, all the inputs and outputs, and provides some further info on using this command.
+
+The main difference from the standard Case 2 finite horizon codes is that the problem solved by agents can be completely different for each age. In particular, the number of grid points, and hence implicitly the dimensions, of the decision variables $d$, the endogenous states $a$, and the exogenous states $z$ (and their transitions) are all allowed to depend on age $j$.
+
+Using age-dependent grids the Case 2 finite-horizon value function iteration code can be used to solve any problem that can be written in the form
+\begin{equation*}
+ V_j(a_j,z_j)= \max_{d_j} \{ F_j(d_j,a_j,z_j) + \beta_j E[V_{j+1}(a_{j+1}=\phi_a'(d_j,a_j,z_j,z_{j+1}),z_{j+1})|a_j,z_j] \}
+\end{equation*}
+for $j=1,,,J$ subject to
+\begin{eqnarray*}
+ z_{j+1}=\pi_j(z_j) \\
+ V_{J+1}=0
+\end{eqnarray*}
+where \\
+\begin{tabular} {l}
+ $z_j$ $\equiv$ vector of exogenous state variables \\
+ $a_j$ $\equiv$ vector of endogenous state variables \\
+ $d_j$ $\equiv$ vector of decision variables
+\end{tabular} \\
+notice that any constraints on $d_j$, $a_j$, \& $a_{j+1}$ can easily be incorporated into this framework by building them into the return function.
+Note that non-zero termination values for $V_{J+1}$ can be implemented via the definition of $F_J$ (also see $vfioptions.dynasty$).
+
+The main inputs the value function iteration command requires are the discount rate; the return function $F$; and the $\phi$ function that determines next periods state given the decisions.
+
+It also requires to info on how many variables make up $d$, $a$ and $z$ (and the grids onto which they should be discretized).
+
+$vfoptions$ allows you to set some internal options (including parallization), if $vfoptions$ is not used all options will revert to their default values.
+
+The forms that each of these inputs and outputs takes are now described in detail.
+
+\subsection{Inputs and Outputs}
+To use the toolkit to solve problems of this sort the following steps must first be made.
+\begin{itemize}
+ \item Define which of the decision variables, endogenous variables, and exogenous variables depend on age. For example \textcolor{RoyalBlue}{vfioptions.agedependentgrids=[1,0,1]} means that the decision variables change with age (the first 1), the endogenous variables do not (the zero), and the exogenous variables do (the final 1).
+ \item Define $n\_{}a$, $n\_{}z$, and $n\_{}d$ as follows. In this example $n\_{}a$ is age independent and so can be defined as normal except it must now be a column vector rather than a row vector. Since $n\_{}d$ and $n\_{}z$ depend on age they are declared with each row representing a varible, and the columns representing age. So $\textcolor{RoyalBlue}{n\_{}a=[10,10; 5,2]}$ would mean there are two $a$ variables, the first endogenous has 10 grid points at age 1 and 10 grid points at age 2 (the first row, note that the interpretation of those 10 grid points could still differ by age), while the second endogenous variable has 5 grid points at age 1 and 2 grid points at age 2. By setting the number of grid points to 1 a variable essentially disappears, so if there is an exogenous variable at age 1 with 15 grid points but no exogenous variable at age 2 we would have $\textcolor{RoyalBlue}{n\_{}z=[15,1]}$.
+ \item Define $N\_{}j$ as the number of periods in the finite-horizon value function problem.
+ \item Create the (discrete state space) grids for each of the $d$, $a$ \& $z$ variables, for those which do not depend on age you can define them as usual (stacked column vectors), for those that depend on age you must instead define a function that has age (and potentially other parameters) as an input, and returns the grid for that age (in case of exogenous variables $z$ the function must also return the transition matrix for that age), \\
+    \textcolor{RoyalBlue}{d\_{}gridfn, a\_{}gridfn, z\_{}gridfn} \\
+       See example codes for more detail.
+ \item AgeDepGridsParamNames must be defined to contain the names of all the parameters used by each of d\_{}gridfn, a\_{}gridfn, and z\_{}gridfn. This is done for each of $d$, $a$, and $z$ as follows  \\
+     \textcolor{RoyalBlue}{AgeDepGridsParamNames.d\_{}grid=\{ \};} \\
+      \textcolor{RoyalBlue}{AgeDepGridsParamNames.a\_{}grid=\{'agej','theta','gamma'\};} \\
+       \textcolor{RoyalBlue}{AgeDepGridsParamNames.z\_{}grid=\{'agej','theta','sigma','rho'\};} \\
+       (In the current example I am imagining that the $d$ variables do not actually depend on age; this would actually mean that the (empty) parameter names for $d\_{}grid$ are unused and you could actually skip declaring them.)
+ \item Define the return function. This is the most complicated part of the setup. See the example codes applying the toolkit to some well known problems
+     later in this section for some illustrations of how to do this. It should be a Matlab function that takes as inputs various values for $(d,aprime,a,z,j)$
+     and the parameters and outputs the corresponding value for the return function. Notice that the 'age-dependent' aspects of the return function are all coded inside the \textit{ReturnFn}, there is only one function. \\
+     \textcolor{RoyalBlue}{ReturnFn=@(d,aprime,a,z,j,alpha,gamma) ReturnFunction\_{}AMatlabFunction}
+ \item Pass a structure $Parameters$ containing all of the model parameters. Age dependent parameters are declared as row vectors. \\
+     \textcolor{RoyalBlue}{Parameters.beta=0.96; Parameters.alpha=0.3;} \\
+     \textcolor{RoyalBlue}{Parameters.gamma=[1,2,2,1.8];}
+ \item $ReturnFnParamNames$ is a cell containing the names of the parameters used by the ReturnFn (they must appear in same order as used by the ReturnFn). \\
+     \textcolor{RoyalBlue}{ReturnFnParamNames=$\{$'alpha','gamma'$\}$}
+ \item $DiscountFactorParamNames$ is a cell containing the names of the discount factor parameter (it is also used for conditional survival probabilities). \\
+     \textcolor{RoyalBlue}{DiscountFactorParamNames=$\{$'beta'$\}$}
+\end{itemize}
+
+That covers all of the objects that must be created, the only thing left to do is simply call the value function iteration code and let it do it's thing. \\
+\textcolor{RoyalBlue}{[V,Policy] = ValueFnIter\_{}Case2\_{}FHorz(n\_{}d, n\_{}a, n\_{}z, N\_{}j, d\_{}gridfn, a\_{}gridfn, z\_{}gridfn, } \\
+\indent \indent \textcolor{RoyalBlue}{AgeDepGridsParamNames, ReturnFn, Parameters, DiscountFactorParamNames, } \\
+\indent \indent \textcolor{RoyalBlue}{ReturnFnParamNames, vfoptions);}
+
+The \textit{outputs} are substantially more complicated with age dependent grids. The two outputs are still the value function $V$ and the policy function $Policy$, but now these are structures and the age $7$ value function is $V.j007$ while the age $12$ policy function is $V.j012$. That is, the value function for any age can be found by 'V dot j (three digit number for age)', analagously for the optimal policy function. The age-dependent value functions are themselves in exactly the same form that the VFI toolkit stores standard value functions; same for the age-dependent optimal policy functions.
+
+\subsection{Some further remarks}
+\begin{itemize}
+ \item Age-dependent grids are only available with $Case\_{}2$. This is because it seems unlikely there are many applications of a $Case\_{}1$ that is age-dependent. They can anyway be solved by setting them up as if they were $Case\_{}2$, they would just be able to be coded to run a little faster with a dedicated command.
+ \item Almost all of the remarks for when the grids do not depend on age remain relevant.
+\end{itemize}
+
+\subsection{Options}
+When using age dependent grids inputting \textit{vfoptions} is a required input, and as well as telling the toolkit to use the age dependent grids it also allows you to set various internal options. Perhaps the most important of these is \textit{vfoptions.parallel} which can be used get the codes to run parallely across multiple CPUs (see the examples). Other than \textit{vfoptions.agedependentgrids} all the other options are exactly as for the standard \textit{ValueFnIter\_{}Case2\_{}FHorz} command, see Section \ref{sec:VFI_Case1_FHorz} for details.
+

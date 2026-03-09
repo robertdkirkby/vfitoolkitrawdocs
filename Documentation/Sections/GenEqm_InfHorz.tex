@@ -1,0 +1,106 @@
+The command \textit{HeteroAgentStationaryEqm\_{}Case1} (and \textit{\_{}Case2}) allows for easy calculation of the price (vector) associated with the general equilibrium of
+standard Bewley-Huggett-Aiyagari models\footnote{General equilibrium incomplete market heterogeneous agent models with idiosyncratic, but no aggregate, shocks.}$^{,}$\footnote{In
+principle one could use these codes to solve fixed-point problems around value function problems more generally, but this would be more advanced.}.
+
+As well as the standard inputs required for the Value function iteration command the other inputs needed are related to evaluating the general equilibrium
+conditions.
+
+By default the command will use matlabs \href{http://www.mathworks.com/help/matlab/ref/fminsearch.html}{fminsearch} command to solve the fixed-point problem represented by the general equilibrium requirement.
+Alternatively the user can set $n\_{}p$ to be non-zero in which case the general equilibrium condition will be evaluated on a grid for prices. This can
+be useful if you which to check for the possible existence of multiple equilibria and has the advantage of possessing well understood convergence
+properties \citep*{KirkbyHeteroErrors}.
+
+In the notation of the toolkit this is any problem for which the competitive equilibrium can be written as
+\begin{definition} \label{defn:HeteroAgentCE}
+A \textit{Competitive Equilibrium} is an agents value function $V_{p}$; agents policy function $g$;
+vector of prices $p$; measure of agents $\mu_{p}$;
+such that
+\begin{enumerate}
+ \item Given prices $p$, the agents value function $V_p$ and policy function $g_p$ solve the agents problem
+   given by a Case 1 value function (as described in Section \ref{sec:VFI_Case1}).
+ \item Aggregates are determined by individual actions: $B_p=\mathcal{A}(\mu_p)$.
+ \item Markets clear (in terms of prices): $\lambda(B_p,p)=0$.
+ \item The measure of agents is invariant:
+      \begin{equation}
+          \mu_p(a,z)=\int \int \left[ \int 1_{a=g^{a'}_p(\hat{a},z)}\mu_p(\hat{a},z) Q(z,dz')\right] d\hat{a}dz
+      \end{equation}
+\end{enumerate}
+\end{definition}
+the $p$ subscripts denote that these objects depend on the price(s) $p$.
+
+\subsection{Preparing the model}
+To use the toolkit to solve problems of this sort the following steps must first be made.
+\begin{enumerate}
+ \item Create all of the variables that are needed for the value function problem. These are exactly the same as those used for
+   $ValueFnIter\_{}Case1$ and the exact same notation applies (See Section \ref{sec:VFI_Case1}). \\
+    (Namely \textcolor{RoyalBlue}{V0, n\_{}d, n\_{}a, n\_{}z, d\_{}grid, a\_{}grid, z\_{}grid, pi\_{}z,} \\
+    \indent \textcolor{RoyalBlue}{ReturnFn, Parameters, DiscountFactorParamNames, ReturnFnParamNames, [vfoptions]})
+ \item Define functions for any aggregate variables that are needed by the general equilibrium equation in terms of the micro-level variables, these
+   are evaluated as the integral of the function over the stationary agents distribution. Store all these functions together. \\
+   eg., if the only aggregate variables is the integral of the endogenous state, then \\
+   \textcolor{RoyalBlue}{FnsToEvaluateFn\_{}1 = @(aprime\_{}val,a\_{}val,s\_{}val;} \\
+   (You always need the $@(...)$ defined either in this way, or with $@(d\_{}val,...)$ where appropriate. You also need to include parameters where appropriate, done in same way
+   as parameters are passed to the $GeneralEqmEqn$ below.) \\
+   Define the names of any parameters used to evaluate the aggregate variables. \\
+   \textcolor{RoyalBlue}{FnsToEvaluateParamNames(1).Names=\{\};} \\
+   (In our example there were none, but an example might be that you want to evaluate tax revenue, which is a tax rate parameter times an endogenous state variable, then the tax rate
+    parameter name will be given here.) \\
+   You then store all of these together: \\
+   \textcolor{RoyalBlue}{FnsToEvaluate=\{FnsToEvaluateFn\_{}1\};}
+   (For models with multiple FnsToEvaluateFns simply create more in same manner and store them all in $FnsToEvaluate$.)
+ \item Define functions for how to calculate general equilibrium conditions for which we need to find general equilibrium. Then store these
+    functions together. \\
+    Create General Equilibrium equation: \\
+    \textcolor{RoyalBlue}{GeneralEqmEqn\_{}1 = @(AggVars,p,param1, param2) p-param1*AggVars(1)\^{}param2} \\
+    Give the names of the parameters: \\
+    \textcolor{RoyalBlue}{GeneralEqmEqnParamNames(1).Names = $\{$'param1', 'param2'$\}$} \\
+    ($param1$ must exist in $Parameter.param1$; similarly for $param2$. '$param1$' is the name of the parameter, e.g. '$alpha$') \\
+    You then store all of these together: \\
+    \textcolor{RoyalBlue}{GeneralEqmEqns={GeneralEqmEqn\_{}1};} \\
+    (For models with multiple General Equilibrium Equations simply create more in same manner and store them all in $GeneralEqmEqns$.)
+ \item Define the names of the prices which are being used to calculate general equilibrium equations. General equilibrium will be where the inputed
+   values of these correspond to those that lead the general equilibrium equations to be zero-valued. \\
+   \textcolor{RoyalBlue}{GEPriceParamNames=\{'r'\};} \\
+   (Technically, in terms of finding the general equilibrium these could be any quantity, not just prices.)
+\end{enumerate}
+That covers all of the objects that must be created, the only thing left to do is simply call the heterogeneous agent general equilbrium code. \\
+\textcolor{RoyalBlue}{[p\_{}eqm,p\_{}eqm\_{}index,GeneralEqmConditions] =} \\
+\indent \textcolor{RoyalBlue}{  HeteroAgentStationaryEqm\_{}Case1(V0, n\_{}d, n\_{}a, n\_{}z, n\_{}p, pi\_{}z,d\_{}grid, a\_{}grid, s\_{}grid,} \\
+\indent \indent \textcolor{RoyalBlue}{   ReturnFn, FnsToEvaluate, GeneralEqmEqns, Parameters, DiscountFactorParamNames, } \\
+\indent \indent \textcolor{RoyalBlue}{   ReturnFnParamNames, FnsToEvaluateParamNames, GeneralEqmEqnParamNames, } \\
+\indent \indent \textcolor{RoyalBlue}{   GEPriceParamNames, [heteroagentoptions], [simoptions], [vfoptions]);}
+
+Once run $p\_{}eqm$ will contain the general equilibrium price vector. $GeneralEqmConditions$ will be a vector containing the values for each of the market
+clearance conditions (general equilibrium is where these equals zero).
+$p\_{}eqm\_{}index$ will simply take the value $nan$, unless you are using the
+(non-default) grid on prices options, see 'Some further remarks' below.
+
+\subsection{Some further remarks}
+\begin{itemize}
+ \item The $Case2$ command is the same, except that you also need to input \textcolor{RoyalBlue}{$Phi\_{}aprimeKron$} and \textcolor{RoyalBlue}{$Case2\_{}Type$}
+   in exactly the same way as for the $ValueFnIter\_{}Case2$ command.
+ \item By setting $n\_{}p$ to a non-zero value you tell the command that instead of using $fminsearch$ (which uses simplex methods) to solve
+   for the general equilibrium using the general equilibrium conditions it should instead use a grid on prices. $n_p$ should describe the size of
+   the grids for the price vectors (in exactly the same way as $n_d$ contains the size of the grids for the vector of decision variables $d$).
+   The price grids themselves should be passed as a stacked column vector in $heteroagentoptions.pgrid$, the format of being exactly the same
+   as is used for $d\_{}grid$ or $z\_{}grid$, ie. a stacked column vector. In this case the output of $p\_{}eqm\_{}index$ is now the grid
+   index corresponding to $p\_{}eqm$, and $GeneralEqmConditions$ contains the values for each of the general equilibrium conditions at every point
+   on the price grid.
+\end{itemize}
+
+\subsection{Options}
+The options for the value function and stationary distribution can be set using structures called \textit{vfoptions}
+and \textit{simoptions} and are exactly the same as those for $ValueFnIter\_{}Case1$ and $StationaryDist\_{}Case1$.
+Further options can be passed in \textit{heteroagentoptions} and include $heteroagentoptions.pgrid$, \\
+$heteroagentoptions.verbose$, $heteroagentoptions.multiGEcriterion$ and $heteroagentoptions.fminalgo$.
+$heteroagentoptions.pgrid$ is used when you want to evaluate the general equilibrium conditions on a grid on prices, see
+'Some Further Remarks' just above. $heteroagentoptions.multiGEcriterion$ and $heteroagentoptions.fminalgo$
+allow you to change multiple general equilibrium conditions are evaluated (the former) and which algorithm is used
+to compute the general equilibrium fixed-point problem (the later); both are currently inactive and simply implemented
+to allow future extensions of the code.
+
+\subsection{Examples}
+See the Aiyagari (1994) example at \\
+\href{https://github.com/vfitoolkit/VFItoolkit-matlab-examples/tree/master/HeterogeneousAgentModels}{github.com/vfitoolkit/VFItoolkit-matlab-examples/tree/master/HeterogeneousAgentModels}
+
+

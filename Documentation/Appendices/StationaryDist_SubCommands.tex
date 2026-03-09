@@ -1,0 +1,95 @@
+\subsection{StationaryDist\_{}Case1\_{}Simulation}
+All of the inputs required will already have been created either by running the VFI command, or because they were themselves required as an 
+input in the VFI command.
+
+\subsubsection{Inputs and Outputs}
+To use the toolkit to solve problems of this sort the following steps must first be completed.
+\begin{itemize}
+ \item You will need the optimal policy function, $Policy$, as outputed by the VFI commands. \\
+    \textcolor{RoyalBlue}{Policy}
+ \item Define $n\_{}a$, $n\_{}z$, and $n\_{}d$. You will already have done this to be able to run the VFI command.
+ \item Create the transition matrices, $pi\_{}z$ for the exogenous $z$ variables. Again you will already have done this to be able to run the VFI command.
+\end{itemize}
+
+That covers all of the objects that must be created, the only thing left to do is simply call the value function iteration code and let it do it's thing. \\
+\textcolor{RoyalBlue}{StationaryDist=StationaryDist\_{}Case1\_{}Simulation(Policy,n\_{}d,n\_{}a,n\_{}z,pi\_{}z, [simoptions]);}
+
+The outputs are
+\begin{itemize}
+ \item $StationaryDist$: The steady state distribution evaluated on the grid (ie. on $a \times z$). It will be a matrix of size $[n_a,n_z]$ and at each point 
+    it will be the value of the probability distribution function evaluated at the corresponding point $(a,z)$.
+\end{itemize}
+
+% \subsubsection{Some further remarks}
+% \begin{itemize}
+%  \item 
+% \end{itemize}
+
+\subsubsection{Options}
+Optionally you can also input a further argument, a structure called \textit{simoptions}, which allows you to set various internal options. Perhaps
+the most important of these is \textit{simoptions.parallel} which can be used get the codes to run on the GPU (see the examples).
+Following is a list of the \textit{simoptions}, the values to which they are being set in this list are their default values.
+\begin{itemize}
+  \item Define the starting (seed) point for each simulation. \\
+    \textcolor{RoyalBlue}{simoptions.seedpoint=[ceil(N\_{}a/2),ceil(N\_{}z/2)];}
+  \item Decide how many periods the simulation should run for. \\
+    \textcolor{RoyalBlue}{simoptions.simperiods=10\^{}4;}
+  \item Decide for how many periods the simulation should perform a burnin from the seed point before the 'simperiods' begins. \\
+    \textcolor{RoyalBlue}{simoptions.burnin=10\^{}3;}
+  \item If you want to parallelize the code on the GPU set to two, parallelize on CPU set to one, single core on CPU set as zero \\
+    \textcolor{RoyalBlue}{simoptions.parallel=1;} \\
+    (Each simulation will be $simperiods$/$ncores$ long, and each will begin from $seedpoint$ and have a burnin of $burnin$ periods.)
+  \item If you want feedback set to one, else set to zero \\
+    \textcolor{RoyalBlue}{simoptions.verbose=0} \\
+      (Feedback includes some on the run times of various parts of the code)
+  \item If you are using parallel you need to tell it how many cores you have (this is true both for CPU and GPU parallelization). 
+    \textcolor{RoyalBlue}{simoptions.ncores=1;}
+\end{itemize}
+
+\subsection{StationaryDist\_{}Case1\_{}Iteration}
+All of the inputs required will already have been created either by running the VFI command, or because they were themselves required as an 
+input in the VFI command. The only exception is an initial guess for $StationaryDist$; call it $InitialDist$ which can be any matrix of size $[n\_{}a,n\_{}z]$ which sums to one.
+
+\subsubsection{Inputs and Outputs}
+To use the toolkit to solve problems of this sort the following steps must first be completed.
+\begin{itemize}
+ \item You need an initial guess, $InitialDist$, for the steady-state distribution. This can be any $[n\_{}a,n\_{}z]$ matrix which sums to one. \\
+     \textcolor{RoyalBlue}{InitialDist=ones([n\_{}a,n\_{}z]);}
+ \item You will need the optimal policy function, $Policy$, as outputed by the VFI commands. \\
+    \textcolor{RoyalBlue}{Policy}
+ \item Define $n\_{}a$, $n\_{}z$, and $n\_{}d$. You will already have done this to be able to run the VFI command.
+ \item Create the transition matrices, $pi\_{}z$ for the exogenous $z$ variables. Again you will already have done this to be able to run the VFI command.
+\end{itemize}
+
+That covers all of the objects that must be created, the only thing left to do is simply call the value function iteration code and let it do it's thing. \\
+\textcolor{RoyalBlue}{StationaryDist=StationaryDist\_{}Case1\_{}Iteration(InitialDist,Policy,n\_{}d,n\_{}a,n\_{}z,pi\_{}z,[simoptions]) } 
+
+The outputs are
+\begin{itemize}
+\item $StationaryDist$: The stationary distribution evaluated on the grid (ie. on $a \times z$). It will be a matrix of size $[n_a,n_z]$ and at each point 
+    it will be the value of the probability distribution function evaluated at the corresponding point $(a,z)$.
+\end{itemize}
+
+\subsubsection{Some Remarks}
+\begin{itemize}
+ \item Be careful on the interpretation of the limiting distribution of the measure over the endogenous state and the idiosyncratic endogenous
+     state. If the model has idiosyncratic but no aggregate uncertainty then this measure will also represent the steady-state agent distribution. However if there
+     is aggregate uncertainty then it does not represent the measure of agents at any particular point in time, but is simply the unconditional probability
+     distribution [Either of aggregates, or jointly of aggregates and the agents. Depends on the model. For more on this see \cite{Imrohoroglu1989} , pg 1374)].
+ \item If the model has idiosyncratic and aggreate uncertainty and individual state is independent of the aggregate state then $pi\_{}sz=kron(pi\_{}s,pi\_{}z);$.
+\end{itemize}
+
+
+\subsubsection{Options}
+Optionally you can also input a further argument, a structure called \textit{simoptions}, which allows you to set various internal options. Perhaps
+the most important of these is \textit{simoptions.parallel} which can be used get the codes to run on the GPU (see the examples).
+Following is a list of the \textit{simoptions}, the values to which they are being set in this list are their default values.
+ \begin{itemize}
+ \item Define the tolerance level to which you wish the steady-state distribution convergence to reach \\
+    \textcolor{RoyalBlue}{simoptions.tolerance=10\^{}(-9)}
+ \item Set a maximum number of iterations that will be taken when trying to converge to the stationary distribution. If convergence is not reached before this number of iterations the convergence will be terminated and a warning message printed to screen to effect that this maximum number of iterations has been reached. \\
+    \textcolor{RoyalBlue}{simoptions.maxit=5*10\^{}4;} \\
+      (In my experience, after simulating an initial guess, if you need more that 5*10\^{}4 iterations to reach the stationary distribution it is because something has gone wrong.)
+  \item If you want to parallelize the code on the GPU set to two, parallelize on CPU set to one, single core on CPU set as zero \\
+    \textcolor{RoyalBlue}{simoptions.parallel=2;}
+\end{itemize}

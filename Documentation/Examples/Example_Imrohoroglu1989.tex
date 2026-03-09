@@ -1,0 +1,41 @@
+%\documentclass[DiscStateSpaceToolkit.tex]{subfiles} 
+%\begin{document}
+
+\cite{Imrohoroglu1989} introduces the use of both idiosyncratic and aggregate shocks; albeit without an aggregate shock.
+The paper looks at the cost of recessions (business cycles) in a manner following \cite{Lucas1987} introducing into the model
+the idea that recessions do not affect everyone in the same way, in particular in this model in a recession those how
+find themselves out of work will be more likely to remain out of work during a recession. A number of different economies
+(model variants) are considered and the code has an option at the beginning for which one will be implemented.
+It is of additional interest here as it will illustrate how to use the toolkit commands in the presence of two exogenous shocks.
+
+The value function problem to be solved is,
+\begin{equation*}
+ V(a,s,z)=\sup_{a'} \{ \frac{c^{1-\sigma}}{1-\sigma}+\beta*E[V(a',s',z')|s,z]
+\end{equation*}
+subject to
+\begin{align*}
+ & c+\frac{a'}{1+r}=a+earnings(s) \\
+ & earnings(s)=\left\{ \begin{array}{lr} y & \text{if s=employed}, \\ \theta y & \text{if s=unemployed} \end{array} \right.
+ & (s,z')=\pi(s,z)
+\end{align*}
+where $a$ is asset holdings, $c$ is consumption, $s$ is an idiosyncratic shock and determines whether
+a household is employed or unemployed. $z$ is an aggregate shock (recession or expansion). 
+A variety of different economies are considered, with and without aggregate shocks, $z$, and changing
+the way in which $s$ changes state (whether or not it depends on aggregate state). See \cite{Imrohoroglu1989}
+for a detailed discussion.
+
+
+The following code solves this model, using parallelization on GPU, and (IN PROGRESS) replicates the results
+of \cite{Imrohoroglu1989}; it contains comments describing what is being done
+at each step. This code is a copy of $Imrohoroglu1989.m$ which you can run and modify to get a better feel for how
+to use the toolkit. Below that is the code that defines the return function, $Imrohoroglu1989\_{}ReturnFn.m$.
+
+\textbf{Contents of Imrohoroglu1989.m}
+\lstinputlisting[language=Matlab]{./Examples/MatlabCodes/Imrohoroglu1989.m}
+
+\smallskip
+
+\textbf{Contents of Imrohoroglu1989$\_{}$ReturnFn.m}
+\lstinputlisting[language=Matlab]{./Examples/MatlabCodes/Imrohoroglu1989_ReturnFn.m}
+
+%\end{document}

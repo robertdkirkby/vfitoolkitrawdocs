@@ -1,0 +1,64 @@
+%\documentclass[DiscStateSpaceToolkit.tex]{subfiles} 
+%\begin{document}
+ 
+The Basic Real Business Cycle Model presented here simply extends the Stochastic Neo-Classical Growth Model to include an endogenous
+choice of labour supply (of how much to work). This is an important difference in terms of the Toolkit we know have a '$d$' variable:
+a choice variable that does not affect tomorrows state (in the Stochastic Neo-Classical Growth Model the only choice variable
+was '$aprime$', next periods state). The following code solves the model. Below that are two further codes that 
+providing examples of what one can then do with the solution of the value function iteration problem. The first demonstrates how to 
+use the policy function created by the Value Function (Case 1) command to reproduce the relevant findings
+of \cite*{AruobaFernandezVillaverdeRubioRamirez2006} looking at the sizes of numerical errors; this serves the added purpose of 
+allowing you to easily experiment with how measures of the numerical errors change with the choice of grids. The second provide examples of how to 
+use further Toolkit commands to simulate time series and calculate Standard Business Cycle Statistics.
+
+The value function problem to be solved is,
+\begin{equation*}
+ V(k,z)=\sup_{k',l} \, \{ \frac{(c^{\theta} (1-l)^{1-\theta})^{\tau}}{1-\tau}+\beta*E[V(k',z')|z] \}
+\end{equation*}
+subject to
+\begin{eqnarray}
+ & c+i=exp(z) k^{\alpha} l^{1-\alpha} \\
+ & k'=(1-\delta)k+i \\
+ & z'=\rho z +\epsilon' \quad ,\epsilon \overset{iid}{\sim} N(0,\sigma_{\epsilon}^2)
+\end{eqnarray}
+where $k$ is physical capital, $i$ is investment, $c$ is consumption, $l$ is labour supply, $z$ is a productivity shock that follows an AR(1) process; 
+$exp(z) k^{\alpha}$ is the production function, $\delta$ is the depreciation rate.
+
+We will use the \href{appendix:TauchenMethod}{Tauchen Method} to discretize the AR(1) shock.
+
+The codes implementing this model are available at  \href{https://github.com/vfitoolkit/VFItoolkit-matlab-examples}{github.com/vfitoolkit/VFItoolkit-matlab-examples}
+
+The code $BasicRealBusinessCycleModel.m$ solves the model, using parallelization on GPU, and uses $BasicRealBusinessCycleModel\_{}ReturnFn.m$ which defines the return function. \\
+There are also $BasicRealBusinessCycleModel\_{}BusinessCycleStatistics.m$ which reimplements solving the model and then goes on to use some of the other
+Toolkit commands to simulate time series and calculate the Standard Business Cycle statistics. \\
+Also $BasicRealBusinessCycleModel\_{}NumericalErrors.m$
+which reimplements solving the model and then goes on to use the output to reproduces a number of relevant elements from 
+Tables \& Figures in \cite*{AruobaFernandezVillaverdeRubioRamirez2006} relating to the accuracy of numerical solutions.
+% 
+% \textbf{Contents of StochasticNeoClassicalGrowthModel.m}
+% \lstinputlisting[language=Matlab]{./Examples/MatlabCodes/BasicRealBusinessCycleModel.m}
+% 
+% \smallskip
+% 
+% \textbf{Contents of StochasticNeoClassicalGrowthModel$\_{}$ReturnFn.m}
+% \lstinputlisting[language=Matlab]{./Examples/MatlabCodes/BasicRealBusinessCycleModel_ReturnFn.m}
+% 
+% \smallskip
+% 
+% \textbf{Contents of StochasticNeoClassicalGrowthModel$\_{}$BusinessCycleStatistics.m}
+% \lstinputlisting[language=Matlab]{./Examples/MatlabCodes/BasicRealBusinessCycleModel_BusinessCycleStatistics.m}
+% 
+% \smallskip
+% 
+% \textbf{Contents of StochasticNeoClassicalGrowthModel$\_{}$NumericalErrors.m}
+% \lstinputlisting[language=Matlab]{./Examples/MatlabCodes/BasicRealBusinessCycleModel_NumericalErrors.m}
+
+% \textbf{Contents of AruobaFernandezVillaverdeRubioRamirez2006.m}
+% \lstinputlisting[language=Matlab]{/home/kmarshallbanana/PhD/Matlab_Codes/DiscStateSpaceToolkit/AruobaFernandezVillaverdeRubioRamirez2006.m}
+% 
+% \smallskip
+% 
+% \textbf{Contents of AruobaFernandezVillaverdeRubioRamirez2006$\_{}$ReturnFn.m}
+% \lstinputlisting[language=Matlab]{/home/kmarshallbanana/PhD/Matlab_Codes/DiscStateSpaceToolkit/AruobaFernadezVillaverdeRubioRamirez2006_ReturnFn.m}
+
+%\end{document}

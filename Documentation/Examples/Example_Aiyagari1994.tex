@@ -1,0 +1,56 @@
+%\documentclass[DiscStateSpaceToolkit.tex]{subfiles} 
+%\begin{document}
+ 
+Aiyagari (1994) is somewhat similar to Hugget (1993), the later has a pure-exchange economy while
+the first is a production economy, but the models otherwise have much in common. Both are interested
+in the question of how idiosyncratic shocks, incomplete markets, and borrowing constraints interact and
+their possible effects on interest rates.
+
+In this model agents labour supply is exogenously determined (the idiosyncratic shocks act via varying wage 
+earings). Agents aim to maximize their consumption by saving capital. They are unable to borrow, but can
+accumulate the capital as precautionary savings. In the aggregate these individual savings determine the aggregate
+capital level (and their exogenous labour supplies the aggregate labour supply), which in turn, via the assumption
+of a Cobb-Douglas production function and competitive markets (so factors are paid marginal products) determine 
+the interest rate and wage.
+
+
+Thus, the agents problem is to chose consumption $c$ and assets $k$ to maximize
+\begin{align*}
+ E[\sum_{t=0}^{\infty} \beta^t \frac{c^{1-\mu}-1}{1-\mu}]
+\end{align*}
+(note that for $\mu=1$ this is log-utility) subject to a budget constraint and no-borrowing constraint
+\begin{align*}
+ c_t+k_{t+1}=w l_t + (1+r)k_t \\
+ c_t \geq 0, \text{ } a_t \geq -b
+\end{align*}
+From the assumption of a Cobb-Douglas production function $f=K^{\alpha}L^{1-\alpha}$ and perfect competition, and that capital
+depreciates at rate $\delta$, we have that
+\begin{align}
+ r=\alpha K^{\alpha-1} L^{1-\alpha} -\delta \label{Aiyagari:eqn:r} \\
+ w=(1-\alpha) K^{\alpha} L^{-\alpha} \label{Aiyagari:eqn:w}
+\end{align}
+The labour endowment shocks, $l_t$, are assumed to follow an AR(1) process in logs, namely
+\begin{align*}
+ log(l_t)=\rho log(l_{t-1})+\sigma(1-\rho^2)^{1/2} \epsilon_t        \qquad \qquad \epsilon_t \sim N(0,1)
+\end{align*}
+
+There are currently two markets that must clear, capital and labour (we need to get the interest rate and wage to be the relevant marginal products), but 
+before coding the model notice that in fact we don't need to try and solve for both interest rate and wage since there is a unique mapping between them. This
+comes about because of the use of a Cobb-Douglas production function; combining equations \ref{Aiyagari:eqn:r} \& \ref{Aiyagari:eqn:w} we get that in equilbrium
+$w=(1-\alpha)((r+\delta)/\alpha)^{-\alpha /(1-\alpha)}$. Thus we only need a grid for interest rates (not wages) and only need to look at market clearing in
+the capital market (to check eqn \ref{Aiyagari:eqn:r} holds). Another thing to notice is that since labour is exogenous and there are a continuum of agents
+of weight one we will always have that $L=E[l]=E[exp(log(l))]$ (recall that the AR(1) process on $l$ is in logs). Thus we don't need to go and calculate $L$ 
+again for every change in prices (interest rates and wages). The borrowing constraint is easily imposed by simply having the assets grid start from $-b$.
+
+Aiyagari defines as the 'natural borrowing limit', the maximum amount that could be paid back at the equilibrium interest rate if the agent were forever 
+stuck in the low wage state (in the models notation; natural borrowing limit is $b_n=wl_1/r$, where $l_1$ is the smallest state of $l_t$). Any borrowing 
+limit stricter than this is called an 'ad-hoc' borrowing limit. In particular the case of 'no borrowing' ($b=0$) used in the computation of the model
+constitutes an ad-hoc borrowing limit.
+
+The code implementing the model is following, loosely speaking it recreates individual elements of Tables I \& II of that paper. Aiyagari also looks 
+at a couple of other results; recreating them using the objects created by the code is fairly easy but not done here.
+
+
+\lstinputlisting[language=Matlab]{./Examples/MatlabCodes/Aiyagari1994.m}
+
+%\end{document}

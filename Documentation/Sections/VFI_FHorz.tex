@@ -1,0 +1,132 @@
+ 
+The relevant command is \\
+\textcolor{RoyalBlue}{[V,Policy] = ValueFnIter\_{}Case1\_{}FHorz(n\_{}d, n\_{}a, n\_{}z, N\_{}j, d\_{}grid, a\_{}grid, z\_{}grid, pi\_{}z, } \\
+\indent \indent \textcolor{RoyalBlue}{ReturnFn, Parameters, DiscountFactorParamNames, ReturnFnParamNames, [vfoptions]);} \\
+This section describes the problem it solves, all the inputs and outputs, and provides some further info on using this command.
+
+The main difference from the infinite horizon codes (other than the obvious that the horizon is finite) is that parameters are allowed
+to depend on age. To do this simply declare an (age dependent) parameter as a row vector of length N\_{}j. The command automatically
+determines which parameters are age dependent and which are not and acts accordingly. (The return function also depends
+on $j$. Non-default options allow for further age dependence in the exogenous shock process. It is also possible to solve models in which the agents problem is completely different (including number of state variables, etc.) for every age using \textit{age dependent grids} as described in Section \ref{sec:agedepgrids}.)
+
+The Case 1 finite-horizon value function iteration code can be used to solve any problem that can be written in the form
+\begin{equation*}
+ V_j(a,z)= \max_{d,a'} \{ F_j(d,a',a,z) + \beta_j E[V_{j+1}(a',z')|a,z] \}
+\end{equation*}
+for $j=1,,,J$ subject to
+\begin{eqnarray*}
+ z'=\pi(z) \\
+ V_{J+1}=0
+\end{eqnarray*}
+where \\
+\begin{tabular} {l}
+ z $\equiv$ vector of exogenous state variables \\
+ a $\equiv$ vector of endogenous state variables \\
+ d $\equiv$ vector of decision variables
+\end{tabular} \\
+notice that any constraints on $d$, $a$, \& $a'$ can easily be incorporated into this framework by building them into the return function.
+Note that non-zero termination values for $V_{J+1}$ can be implemented via the definition of $F_J$ (see also, $vfioptions.dynasty$). More complex problems can be solved using 'age-dependent grids', see Section \ref{sec:agedepgrids}.
+
+The main inputs the value function iteration command requires are the grids for $d$, $a$, and $z$; the discount rate; the transition matrix for $z$; and the
+return function $F$.
+
+It also requires to info on how many variables make up $d$, $a$ and $z$ (and the grids onto which they should be discretized).
+
+$vfoptions$ allows you to set some internal options (including parallization), if $vfoptions$ is not used all options will revert to their default values.
+
+The forms that each of these inputs and outputs takes are now described in detail. The best way to understand how to use the
+command may however be to just go straight to the examples; in particular the Finite-Horizon Stochastic Consumption-Savings model (Appendix \ref{example:FHorzStochConsSavings}).
+
+\subsection{Inputs and Outputs}
+To use the toolkit to solve problems of this sort the following steps must first be made.
+\begin{itemize}
+ \item Define $n\_{}a$, $n\_{}z$, and $n\_{}d$ as follows. $n\_{}a$ should be a row vector containing the number of grid points for each of the state variables in $a$;
+     so if there are two endogenous state variables the first of which can take two values, and the second of which can take ten values then $n_a=[2,10];$.
+     $n\_{}d$ \& $n\_{}z$ should be defined analagously.
+ \item Define $N\_{}j$ as the number of periods in the finite-horizon value function problem.
+ \item Create the (discrete state space) grids for each of the $d$, $a$ \& $z$ variables, \\
+    \textcolor{RoyalBlue}{a\_{}grid=linspace(0,2,100)'; d\_{}grid=linspace(0,1,100)'; z\_{}grid=[1;2;3];} \\
+       (They should be column vectors. If there are multiple variables they should be stacked column vectors)
+ \item Create the transition matrices for the exogenous $z$ variables\footnote{These must be so that the element in row $i$ and column
+     $j$ gives the probability of going from state $i$ this period to state $j$ next period.} \\
+     \textcolor{RoyalBlue}{pi\_{}z=[0.3,0.2,0.1;0.3,0.2,0.2; 0.4,0.6,0.7];} \\
+     (Often you will want to use the Tauchen Method to create $z\_{}grid$ and $pi\_{}z$)
+ \item Define the return function. This is the most complicated part of the setup. See the example codes applying the toolkit to some well known problems
+     later in this section for some illustrations of how to do this. It should be a Matlab function that takes as inputs various values for $(d,aprime,a,z,j)$
+     and the parameters and outputs the corresponding value for the return function.\\
+     \textcolor{RoyalBlue}{ReturnFn=@(d,aprime,a,z,j,alpha,gamma) ReturnFunction\_{}AMatlabFunction}
+ \item Define the initial value function, the following one will always work as a default, but by making smart choices for this inital value function you can
+     cut the run time for the value function iteration. \\
+     \textcolor{RoyalBlue}{V0=ones(n\_{}a,n\_{}z);}
+ \item Pass a structure $Parameters$ containing all of the model parameters. Age dependent parameters are declared as row vectors. \\
+     \textcolor{RoyalBlue}{Parameters.beta=0.96; Parameters.alpha=0.3;} \\
+     \textcolor{RoyalBlue}{Parameters.gamma=[1,2,2,1.8];}
+ \item $ReturnFnParamNames$ is a cell containing the names of the parameters used by the ReturnFn (they must appear in same order as used by the ReturnFn). \\
+     \textcolor{RoyalBlue}{ReturnFnParamNames=$\{$'alpha','gamma'$\}$}
+ \item $DiscountFactorParamNames$ is a cell containing the names of the discount factor parameter (it is also used for conditional survival probabilities). \\
+     \textcolor{RoyalBlue}{DiscountFactorParamNames=$\{$'beta'$\}$}
+\end{itemize}
+
+That covers all of the objects that must be created, the only thing left to do is simply call the value function iteration code and let it do it's thing. \\
+\textcolor{RoyalBlue}{[V,Policy] = ValueFnIter\_{}Case1\_{}FHorz(n\_{}d, n\_{}a, n\_{}z, N\_{}j, d\_{}grid, a\_{}grid, z\_{}grid, pi\_{}z, } \\
+\indent \indent \textcolor{RoyalBlue}{ReturnFn, Parameters, DiscountFactorParamNames, ReturnFnParamNames, vfoptions);}
+
+The outputs are
+\begin{itemize}
+ \item $V$: The value function evaluated on the grid (ie. on $a \times z$). It will be a matrix of size $[n\_{}a,n\_{}z, N\_{}j]$ and at each point it will be the value of the value function evaluated
+    at the corresponding point $(a,z,j)$.
+ \item $Policy$: This will be a matrix of size $[length(n\_{}d)+length(n\_{}a), n\_{}a, n\_{}z, N\_{}j]$. For each point $(a,z,j)$ the corresponding entries in $Policy$, namely $Policy(:,a,z,j)$ will be a vector containing
+    the optimal policy choices for $(d,a)$.\footnote{By default, $vfoptions.polindorval=1$, they will be the indexes, if you set $vfoptions.polindorval=2$ they will be the values.}
+\end{itemize}
+
+\subsection{Some further remarks}
+\begin{itemize}
+ \item Models where $d$ is unnecessary (only $a'$ need be chosen): set $n\_{}d=0$ and $d\_{}grid=0$ and don't put it into the return fn, the code will
+    take care of the rest.
+ \item Often one may wish to define the grid for $z$ and it's transition matrix by the Tauschen method or something similar. The toolkit provides codes
+    implementing the Tauchen method, see \hyperref[appendix:TauchenMethod]{Appendix \ref*{appendix:TauchenMethod}}
+ \item There is no problem with making the transitions of certain exogenous state variables dependent of the values taken by other exogenous state variables.
+    This can be done in the obvious way; see \hyperref[appendix:MarkovChains]{Appendix \ref*{appendix:MarkovChains}}. (For example: if there are two exogenous variables $z^a$ \& $z^b$ one can have $Pr(z^b_{t+1}=z^b_j)=
+    Pr(z^b_{t+1}=z^b_j | z^b_t)$ and $Pr(z^a_{t+1}=z^a_j)=Pr(z^a_{t+1}=z^a_j | z^a_t, z^b_{t+1}, z^b_t)$.)
+ \item Likewise, dependence of choices and expectations on more than just this period (ie. also last period and the one before, etc.) can also
+    be done in the usual way for Markov chains (see \hyperref[appendix:MarkovChains]{Appendix \ref*{appendix:MarkovChains}}).
+ \item Models with no uncertainty: these are easy to do simply by setting $n\_{}z=1$ and $pi\_{}z=1$.
+\end{itemize}
+
+\subsection{Options}
+Optionally you can also input a further argument, a structure called \textit{vfoptions}, which allows you to set various internal options. Perhaps
+the most important of these is \textit{vfoptions.parallel} which can be used get the codes to run parallely across multiple CPUs (see the examples).
+Following is a list of the \textit{vfoptions}, the values to which they are being set in this list are their default values.
+ \begin{itemize}
+  \item Decide whether you want the optimal policy function to be in the form of the grid indexes that correspond to the optimal policy, or to their grid values. \\
+    \textcolor{RoyalBlue}{vfoptions.polindorval=1} \\
+      (Set vfoptions.polindorval=1 to get indexes, vfoptions.polindorval=2 to get values.)
+  \item If you want to parallelize the code on the GPU set to two, parallelize on CPU set to one, single core on CPU set as zero \\
+    \textcolor{RoyalBlue}{vfoptions.parallel=2}
+  \item If you want feedback set to one, else set to zero \\
+    \textcolor{RoyalBlue}{vfoptions.verbose=0} \\
+      (Feedback includes some info on how convergence is going and on the run times of various parts of the code)
+  \item When running codes on CPU it is often faster to input the Return Function as a matrix, rather than as a function. \\
+    \textcolor{RoyalBlue}{vfoptions.returnmatrix=0} \\
+    (By default it assumes you have input a function. Setting $vfoptions.returnmatrix=1$ tells the codes you have inputed it as a matrix. When using GPU just ignore this option.)
+  \item By default the toolkit assumes standard von-Neumann-Morgenstern preferences. It is possible to overrule this and use 'exotic' preferences instead, if you do this then $DiscountFactorParamNames$ is
+    used to pass the needed additional parameters names. For example, can use Epstein-Zin parameters. \\
+    \textcolor{RoyalBlue}{vfoptions.exoticpreferences=0}
+  \item The 'low memory' option reduces the memory use, allowing you to solve larger state spaces, but is notably slower. Thus you should only
+      choose to set the low memory option to one if the default is giving an 'out of memory' error. \\
+      \textcolor{RoyalBlue}{vfoptions.lowmemory=0} \\
+       (Set vfoptions.lowmemory=0 for much faster but memory intensive codes, vfoptions.lowmemory=1 to reduce memory use.) \\
+  \item When using graphics cards with single-precision floating point numbers\footnote{NVIDIA deliberately handicap most gaming GPUs to single-precision so they can charge a higher price for 'scientific computing'
+    GPUs with double-precision floating point numbers.} I once had a problem due to rounding errors, so that the 'Policy' instead of containing all integer values contained some numbers
+    that were $10^{-15}$ away from being an integer. Setting this option to 1 forces them all to round to integers. Typically this is unnecessary and in principle could cause unintended errors, so is off by default. \\
+    \textcolor{RoyalBlue}{vfoptions.policy\_{}forceintegertype=0}
+  \item Have agents care about future generations (based directly on the value function of their decendents, rather than indirectly by, e.g., warm-glow bequests) by setting the dynasty option equal to 1. Be aware that in this case the transition from one generation to the next alway occours at the final period of the finite horizon and is based on the decisions (and exogenous shocks) between the final period and the first period (representing the decendent). Notice also that this does not consider the possibility of 'decendent on stochastic death' in periods prior to the final period. \\
+  \textcolor{RoyalBlue}{vfoptions.dynasty=0} \\
+  (If using this option you also need to set \textit{simoptions.dynasty})
+  \item Define the tolerance level to which you wish the value function convergence to reach. Note that this is only actually relevant if you are using \textit{vfoptions.dynasty=1}. \\
+    \textcolor{RoyalBlue}{vfoptions.tolerance=10\^{}(-9)}
+
+\end{itemize}
+
+\subsection{Some Examples}
+\subsection*{\hyperref[example:FHorzStochConsSavings]{Example: Finite-Horizon Stochastic Consumption Savings}}

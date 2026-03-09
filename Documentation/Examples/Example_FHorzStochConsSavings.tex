@@ -1,0 +1,29 @@
+%\documentclass[DiscStateSpaceToolkit.tex]{subfiles} 
+%\begin{document}
+ 
+A basic Finite-Horizon Stochastic Consumption Savings problem is given. The household lives $J=10$ periods.
+Wage income, $W$ consists of two parts, a deterministic function of age $W_j$ and a stochastic component $W_z$.
+The household makes a simple choice between consumption $c$ and savings $a$. Savings earn interest rate $r$, and 
+the future is discounted at age-independent rate $\beta$.
+
+The value function problem to be solved is,
+\begin{equation*}
+ V_j(a,z)=\sup_{a'} \, \{ \frac{c^{1-\gamma}-1}{1-\gamma}+\beta E[V_{j+1}(a',z')|z] \}
+\end{equation*}
+$j=1,...,J$, subject to
+\begin{eqnarray}
+ & c+a'= W + a(1+r) \\
+ & W =W_j+W_z\\
+ & log(W_z')=\rho log(W_z) +\epsilon_z' \quad ,\epsilon \overset{iid}{\sim} N(0,\sigma_{\epsilon}^2) \\
+ & V_{11}=0
+\end{eqnarray}
+
+Notice that the parameters defining the deterministic component of income as a function of age, $W_j$, are parameters that depend on age and so are 
+created as a row vector. The VFI Toolkit automatically understands that this row vector represents an age-dependent parameters, while the other parameters
+are not age dependent.
+
+We will use the \href{appendix:TauchenMethod}{Tauchen Method} to discretize the AR(1) shock.
+
+The codes implementing this model are available at  \href{https://github.com/vfitoolkit/VFItoolkit-matlab-examples}{github.com/vfitoolkit/VFItoolkit-matlab-examples}
+
+The code $FiniteHorzStochConsSavings.m$ solves the model, using parallelization on GPU, and uses $FiniteHorzStochConsSavings\_{}ReturnFn.m$ which defines the return function. \\

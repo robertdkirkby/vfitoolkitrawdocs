@@ -1,0 +1,91 @@
+The Case 2\footnote{The description of this as case 2 is chosen as it coincides exactly with the definition of case 2 for stochastic value function problems
+used in Chapter 8 \& 9 of Stokey, Lucas \& Prescott - Recursive Dynamic Economics (eg. pg. 260). In their notation this is any problem that can be written as
+$\textit{v}(x,z)=\sup_{y\in \Gamma(x,z)} \{ F(x,y,z) + \beta \int_Z \textit{v}(\phi (x,y,z'),z')Q(z,dz')\}$} code can be used to solve any problem that
+can be written in the form\footnote{The proofs of SLP do not allow $\phi$ to be a function of $z$ but this can be done; eg. \cite*{Bertsekas1976} provides the finite-horizon results.}
+\begin{equation*}
+ V(a,z)= \max_{d} \{ F(d,a,z) + \beta E[V(a',z')|a,z] \}
+\end{equation*}
+subject to
+\begin{eqnarray*}
+ z'=\pi(z) \\
+ a'=\phi (d,a,z,z')
+\end{eqnarray*}
+where \\
+\begin{tabular} {l}
+ z $\equiv$ vector of exogenous state variables \\
+ a $\equiv$ vector of endogenous state variables \\
+ d $\equiv$ vector of decision variables
+\end{tabular} \\
+notice that any constraints on $d$, $a$, \& $a'$ can easily be incorporated into this framework by building them into the return function.
+While $a'=\phi (d,a,z,z')$ is the most general case it is often not very useful. Thus the code also specifically allows for
+$\phi (d,z,z')$ and $\phi (d)$.
+
+\subsection{Preparing the model}
+To use the toolkit to solve problems of this sort the following steps must first be made.
+\begin{enumerate}
+ \item Define $n\_{}a$, $n\_{}z$, and $n\_{}d$ as follows. $n\_{}a$ should be a row vector containing the number of grid points for each of the state variables in $a$;
+     so if there are two endogenous state variables the first of which can take two values, and the second of which can take ten values then $n_a=[2,10];$.
+     $n\_{}d$ \& $n\_{}z$ should be defined analagously.
+ \item Create the (discrete state space) grids for each of the $d$, $a$ \& $z$ variables, \\
+    \textcolor{RoyalBlue}{a\_{}grid=linspace(0,2,100)'; d\_{}grid=linspace(0,1,100)'; z\_{}grid=[1;2;3];} \\
+       (They should be column vectors. If there are multiple variables they should be stacked column vectors)
+ \item Create the transition matrices for the exogenous $z$ variables\footnote{These must be so that the element in row $i$ and column
+     $j$ gives the probability of going from state $i$ this period to state $j$ next period. So each row must sum to one.} \\
+     \textcolor{RoyalBlue}{pi\_{}z=[0.3,0,3.0,4; 0.2,0.2,0.6; 0.1,0.2,0.7];} \\
+     (Often you will want to use the Tauchen Method to create $z\_{}grid$ and $pi\_{}z$.)
+ \item Define the return function matrix. This is the most complicated part of the setup. See the example codes applying the toolkit to some well known problems
+     later in this section for some illustrations of how to do this. It should be a Matlab function that takes as inputs various values for $(d,a,z)$
+     and outputs the corresponding value for the return function.\\
+     \textcolor{RoyalBlue}{ReturnFn=@(d,a,z) ReturnFunction\_{}AMatlabFunction}
+ \item Pass a structure $Parameters$ containing all of the model parameters. \\
+     \textcolor{RoyalBlue}{Parameters.beta=0.96; Parameters.alpha=0.3;} \\
+     \textcolor{RoyalBlue}{Parameters.gamma=2; Parameters.delta=0.05;}
+ \item $ReturnFnParamNames$ is a cell containing the names of the parameters used by the ReturnFn (they must appear in same order as used by the ReturnFn). \\
+     \textcolor{RoyalBlue}{ReturnFnParamNames=$\{$'alpha','gamma','delta'$\}$}
+ \item $DiscountFactorParamNames$ is a cell containing the names of the discount factor parameter (it is also used for 'exoticpreferences' like Epstein-Zin). \\
+     \textcolor{RoyalBlue}{DiscountFactorParamNames=$\{$'beta'$\}$}
+ \item Define, as a matrix, the function $\phi$ which determines next periods state. The following one is clearly trivial and silly, see the example
+     codes applying the toolkit to some well known problems later in this section for some illustrations of how to do this. \\
+     \textcolor{RoyalBlue}{Phi\_{}aprime=ones(n\_{}d,n\_{}z,n\_{}z);} \\
+     In practice the codes always use $Phi\_{}aprimeKron$ as input. See Appendix AAA (unwritten) on how $Kron$ variables relate to the standard ones. \\
+     Define \textcolor{RoyalBlue}{$Case2\_{}Type$}. This is what tells the code whether you are using \\
+     $Case2\_{}Type=1$: $\phi (d,a,z',z)$ \\
+     $Case2\_{}Type=2$: $\phi (d,z',z)$ \\
+     $Case2\_{}Type=3$: $\phi (d,z')$ \\
+     $Case2\_{}Type=4$: $\phi (d,a)$ \\
+     $Case2\_{}Type=5$: $\phi (a'|d,e')$ \\
+     You should use the one which makes $\phi(\cdot)$ the smallest dimension possible for your problem as this will be fastest.
+%      (For now only $Case2\_{}Type=2$ is able to run on GPU; others are CPU only).
+ \item Define the initial value function, the following one will always work as a default, but by making smart choices for this inital value function you can
+     cut the run time for the value function iteration. \\
+     \textcolor{RoyalBlue}{V0=ones(n\_{}a,n\_{}z);}
+\end{enumerate}
+That covers all of the objects that must be created, the only thing left to do is simply call the value function iteration code and let it do it's thing. \\
+\textcolor{RoyalBlue}{[V,PolicyIndexes] =} \\
+\indent \textcolor{RoyalBlue}{  ValueFnIter\_{}Case2(V0, n\_{}d, n\_{}a, n\_{}z, pi\_{}z,} \\
+\indent \indent \textcolor{RoyalBlue}{   Phi\_{}aprimeKron, Case\_{}2\_{}Type, ReturnFn,} \\
+\indent \indent \textcolor{RoyalBlue}{   Parameters, DiscountFactorParamNames, ReturnFnParamNames, [vfoptions]);}
+
+\subsection{Some further remarks}
+\begin{itemize}
+ \item Notice that Case 1 models are in fact simply a subset of Case 2 models in which one of the decision variables ($d$) is simply next
+   periods endogenous state ($a'$). This means that the Case 2 code could in principle be used for solving Case 1 models, however this
+   would just make everything run slower. (Using the Case 2 code for case one models is done by setting all the elements of $Phi\_{}aprime$
+   to zero, except those for which (a certain element of) $d$ equals $aprime$ which should be set equal to one.)
+ \item The remaining remarks are simply repeats of remarks from Case 1:
+  \begin{itemize}
+   \item Often one may wish to define the grid for $z$ and it's transition matrix by the Tauschen method or something similar. The toolkit provides codes to
+     implement the Tauchen method, see \hyperref[appendix:TauchenMethod]{Appendix \ref*{appendix:TauchenMethod}}.
+   \item There is no problem with making the transitions of certain exogenous state variables dependent of the values taken by other exogenous state variables.
+     This can be done in the obvious way.
+   \item Likewise, dependence of choices and expectations on more than just this period (ie. also last period and the one before, etc.) can also
+     be done in the usual way for Markov chains.
+   \item Models with no uncertainty: these are easy to do simply by setting $n\_{}z=1$ and $pi\_{}z=1$.
+  \end{itemize}
+\end{itemize}
+
+\subsection{Options}
+Optionally you can also input a further argument, a structure called \textit{vfoptions}, which allows you to set various internal options. Perhaps
+the most important of these is \textit{vfoptions.parallel} which can be used get the codes to run parallely across multiple CPUs (see the examples).
+The full list of the \textit{vfoptions} is just the same as for the Case 1 code --- see there for details.
+

@@ -1,0 +1,323 @@
+%\documentclass{book}
+\documentclass[11pt,fleqn]{article}
+%\documentclass[A4]{article}
+
+\textheight=23.3cm 
+\textwidth=16.5cm 
+\topmargin=-15mm 
+\oddsidemargin=0cm 
+
+%\usepackage[fleqn]{amsmath}
+\usepackage{amsmath}
+
+%\usepackage{subfiles}
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{natbib}
+\usepackage[usenames,dvipsnames]{color}
+%\usepackage{amsthm}
+%\usepackage{setspace}
+%\usepackage{multirow}
+\newcommand{\tb}{\hspace*{3mm}}
+\bibpunct{(}{)}{;}{a}{,}{,}
+\parskip=3mm 
+\parindent=5mm 
+\baselineskip=17pt
+
+
+\usepackage{amsthm}
+\newtheorem{assumption}{Assumption}
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
+\renewcommand{\qedsymbol}{\textit{Q.E.D.}}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+
+\usepackage{listings}
+\lstset{
+   language=Matlab,                      % choose the language of the code
+%   basicstyle=10pt,                   % the size of the fonts that are used for the code
+   numbers=left,                           % where to put the line-numbers
+   numberstyle=\footnotesize,            % the size of the fonts that are used for the line-numbers
+   stepnumber=1,                            % the step between two line-numbers. If it's 1 each line will be numbered
+   numbersep=5pt,                        % how far the line-numbers are from the code
+%   backgroundcolor=\color{white},     % choose the background color. You must add \usepackage{color}
+   showspaces=false,                     % show spaces adding particular underscores
+   showstringspaces=false,               % underline spaces within strings
+   showtabs=false,                          % show tabs within strings adding particular underscores
+%   frame=single,                            % adds a frame around the code
+%   tabsize=2,                            % sets default tabsize to 2 spaces
+%   captionpos=b,                            % sets the caption-position to bottom
+   breaklines=true,                         % sets automatic line breaking
+   breakatwhitespace=false,              % sets if automatic breaks should only happen at whitespace
+   escapeinside={\%*}{*)}                % if you want to add a comment within your code
+}
+
+\usepackage{hyperref}
+\hypersetup{
+  pdftitle={VFI Toolkit for Matlab},    % title
+  pdfauthor={Robert Kirkby},     % author
+  %hyperfootnotes=false,
+  %hyperindex=true,
+  %hyperfigures=true,  
+  colorlinks=true,                % makes links a coloured word, rather than putting coloured boxes around them
+  linkcolor=black,                % makes internal links black
+  citecolor=black,                % makes citations black
+  urlcolor=blue,                 % color of external links
+  breaklinks=true                 % allow links to be brocken across multiple lines      
+}
+
+\begin{document}
+
+\title{VFI Toolkit for Matlab}
+\author{Robert Kirkby \\ Victoria University of Wellington}
+\date{\today}
+\maketitle
+
+
+\begin{abstract}
+\noindent This document explains how to use this Toolkit for solving Value function problems in Matlab. The toolkit is written to be applicable to as wide a range of problems as possible. The core of the toolkit is value function iteration on a discrete state space utilizing the GPU. The broader focus is on heterogenous agent models (infinite horizon and finite horizon) and the toolkit automatically handles calculating general equilibrium and transition paths.
+
+The toolkit is available for download from \href{http://www.vfitoolkit.com}{vfitoolkit.com}.
+
+If you want to get straight into using the Toolkit, look briefly at Sections \ref{sec:GettingStarted} and \ref{sec:VFI_Case1}, and then go to Examples \ref{example:StochasticNeoclassicalGrowth} and \ref{example:BasicRBC} on how to solve the Stochastic Neo-Classical Growth Model and a Basic Real Business Cycle Model respectively. If you are already familiar with the Stochastic Neoclassical Growth Model and  Basic Real Business Cycle Model you can skip to looking at the \href{https://github.com/vfitoolkit/VFItoolkit-matlab-examples}{codes implementing them}. The toolkit also handles finite horizon value function problems, see the \href{https://www.vfitoolkit.com/updates-blog/2021/an-introduction-to-life-cycle-models/}{Intro to Life-Cycle Models} and the \href{https://www.vfitoolkit.com/updates-blog/2022/an-introduction-to-olg-models/}{Intro to OLG models}. You might also be interested in \href{https://www.vfitoolkit.com/updates-blog/2020/entry-exit-example-based-on-hopenhayn-rogerson-1993/}{heterogeneous firm models with entry and exit}.
+
+More advanced examples cover life-cycle models, and general equilibrium and transition paths in heterogenous agent models. \\
+Examples: \href{https://github.com/vfitoolkit/VFItoolkit-matlab-examples}{https://github.com/vfitoolkit/vfitoolkit-matlab-examples} \\
+Replications: \href{https://github.com/vfitoolkit/vfitoolkit-matlab-replication}{https://github.com/vfitoolkit/vfitoolkit-matlab-replication}
+
+\end{abstract}
+
+
+\newpage
+\tableofcontents
+\newpage
+
+\textit{The 1950s were not good years for mathematical research. We had a very interesting gentleman
+in Washington named Wilson. He was secretary of Defense, and he actually had a pathological
+fear and hatred of the word ‘research’. I’m not using the term lightly; I’m using it precisely. His
+face would suffuse, he would turn red, and he would get violent if people used the term ‘research’
+in his presence. You can imagine how he felt, then, about the term ‘mathematical’. The RAND
+Corporation was employed by the Air Force, and the Air Force had Wilson as its boss, essentially.
+Hence, I felt I had to do something to shield Wilson and the Air Force from the fact that I was really
+doing mathematics inside the RAND Corporation. What title, what name, could I choose?} \\
+\noindent --- Richard Bellman, on the origin of his term ‘dynamic programming’ (another name for value function iteration) (1984)
+
+\section{Introduction}
+
+Economists often have reason to solve value function problems. This Matlab Toolkit is intended to make doing so easy. It is likely to be faster than value function iteration codes written by a beginner, but will obviously never be as fast as codes written by someone with substantial experience --- there are always aspects of a specific problem that can be exploited to produce faster codes. The Toolkit takes advantage of parallelization on the GPU and CPU (without requiring the user to know when and which to do). VFI Toolkit, and value function iteration generally, is most useful for problems where the first-order conditions of the problem are not both necessary and sufficient, and so methods like perturbation are not usable; ie. it is useful when your value function problem is not the kind that can be solved by Dynare.
+
+The value function iteration commands in this toolkit are designed to be easy to use. In the case of inifinite horizon value functions the toolkit require you to define as inputs the return function, the grids, the transition matrix for the exogenous shocks, and the discount factor. VFI Toolkit then does all of the work of solving the value function iteration problem for you and as outputs gives the value function and the optimal policy function. In particular the toolkit can handle any number of variables (speed and memory permitting). Behind the scenes VFI Toolkit takes advantage of parallelization on the GPU. The GPU makes a large difference and so the toolkit (and documentation) assumes by default that you have and will be using the GPU.
+
+The toolkit also handles finite horizon value function iteration problems, and includes commands to simulate panel data and solve OLG models and their transition paths. The dependence of parameters on age (period) and agent permanent-type is handled automatically.
+
+As well as the main value function iteration commands (which can also solve, e.g., Epstein-Zin preferences) the other main commands are to simulate time series and to calculate the stationary distribution (mainly of use in heterogeneous agent models), as well as computing stationary general equilibrium and even general equilbrium transition paths.
+
+There are also some commands in the toolkit that have not yet been documented; if you are feeling adventurous feel free to browse around the contents of the Toolkit.
+
+The VFI Toolkit is also be available directly from github: \\
+\href{https://github.com/vfitoolkit}{https://github.com/vfitoolkit}
+
+\subsection{Why use value function iteration?}
+While slower than many other numerical methods it has a number of advantages. The main one is their widespread applicability/robustness. Value function iteration can be used to solve problems in which the first-order conditions are not necessary and sufficient. Economic examples include: when borrowing
+constraints bind, buying durable goods (large indivisible goods), and means-tested benefits.\footnote{Other popular methods, such as the perturbation methods used by Dynare, require the first-order conditions to be both necessary and sufficient.}
+
+Their other main strength is their (potential) accuracy \citep*{AruobaFernandezVillaverdeRubioRamirez2006}. The cost of using value function iteration is that it is slower than other numerical methods, although parallelization on the GPU has substantially reduced this penalty \citep*{AldrichFernandezVillaverdeGallantRubioRamirez2011}. If there are many variables or large grids then the code can be very slow, or even that the matrices (in particular the return fn matrix) may simply become to large to be held in memory.
+
+From the theoretical perspective they also have the advantage that their convergence properties, including dealing with numerical errors, are well understood. \citep*{Bertsekas1976, Whitt1978, KirkbyVFIErrors}. Importantly they will still converge in the presence of occasionally binding constraints, non-concave choice sets, and non-concave return functions.
+
+\subsection{Examples and Classic Papers}
+To provide examples of how to use the toolkit in practice a number of examples (model and code) are provided. Going through these provides probably the easiest way to learn to use the toolkit (while providing a bonus lesson in macroeconomics ;). Two main examples, the Stochastic Neoclassical Growth Model
+and the Basic Real Business Cycle are describe and shown in Section \ref{sec:examples}, and the codes are available at \href{https://github.com/vfitoolkit/vfitoolkit-matlab-examples}{github.com/vfitoolkit/vfitoolkit-matlab-examples}.
+
+
+Also available are codes replicating some classic Macro papers (you will need to read the original papers alongside the codes), these can be found at
+\href{https://github.com/vfitoolkit/vfitoolkit-matlab-replication}{github.com/vfitoolkit/vfitoolkit-matlab-replication}.
+The replications of classic papers, as well as demonstrating the abilities and use of the toolkit, can also provide a handy way to figure out which 'Case' of the toolkit you need to use; just look for a classic paper in the list of examples which contains a model with a framework similar to that you wish to implement.
+
+If your interest is in life-cycle models. The toolkit also handles finite horizon value function problems, see the \href{https://www.vfitoolkit.com/updates-blog/2021/an-introduction-to-life-cycle-models/}{Intro to Life-Cycle Models}.
+Those interested in overlapping generations models should check out the \href{https://www.vfitoolkit.com/updates-blog/2022/an-introduction-to-olg-models/}{Intro to OLG models}, which naturally builds on the Intro to Life-Cycle Models by adding general equilibirium.
+
+You might also be interested in \href{https://www.vfitoolkit.com/updates-blog/2020/entry-exit-example-based-on-hopenhayn-rogerson-1993/}{heterogeneous firm models with entry and exit}.
+
+There are also codes implementing the baseline models from the \href{https://github.com/robertdkirkby/LifeCycleOLGReadingList}{reading list of a mini-course} on life-cycle and OLG models.
+
+\subsection{What Can The Toolkit Do?}
+VFI Toolkit has roughly two halves, for infinite-horizon problems and finite-horizon problems, respectively.
+The following provides a rough listing of the main command types, although for anyone familiar with the literature the best guide as to what the toolkit can do is just look at the list of the examples and replications. They give an indication of the kinds of models which can be easily solved using the toolkit.
+\begin{itemize}
+ \item ValueFnIter: Solves the infinite-horizon discrete state space value function iteration problem giving the Value Function and optimal policies.
+ \item StationaryDist: Gives the stationary distribution associated with the model.
+ \item HeteroAgentStationaryEqm: Used to find the equilibrium price levels for a Bewley-Huggett-Aiyagari heterogeneous-agent model with no aggregate uncertainty.
+ \item TransitionPath: Use to find general eqm transition path for a Bewley-Huggett-Aiyagari heterogeneous-agent model with no aggregate uncertainty.
+ \item[] \textit{And then essentially the same commands for finite-horizon problems...}
+ \item ValueFnIter\_{}FHorz: Solves the discrete state space finite-horizon value function iteration problem giving the Value Function and optimal policies.
+ \item StationaryDist\_{}FHors: Gives the stationary distribution associated with the model, based on a specified age-1 distribution.
+ \item SimPanelValues\_{}FHorz: Simulates panel data for finite-horizon based on optimal policy.
+ \item SimLifeCycleProfiles\_{}FHorz: Simulates life-cycle profiles for finite-horizon based on optimal policy.
+ \item HeteroAgentStationaryEqm\_{}FHorz: Solve for general equilibrium for heterogeneous agent OLG model.
+ \item TransitionPath\_{}FHorz: Use to find general eqm transition path for a heterogeneous-agent OLG model.
+\end{itemize}
+
+Many other commands exist. Such as discretization commands for various stochastic processes, and many commands for analysing model outputs (such as computing inequality statistics).
+
+\subsection{Parallelization}
+By default the toolkit assumes you have a GPU and four or more CPUs. It then automatically switches back and forth between these based on which typically works faster in practice.
+
+If you wish to overrule the defaults you can use the 'parallel' option, available in many of the commands. If Parallel is set to zero the code will run without any parallelization. If Parallel is set to 1 then codes will run on parallel CPUs (the $ncores$ option controls how many CPU cores are used). If Parallel is set to 2 the code will run in parallelized on the GPU.
+
+To be able to use the option to parallelize on the GPU you need to install the CUDA toolkit (GPU parallelization only works with NVIDIA graphics cards that support CUDA). 
+
+\subsection{Details on the Algorithms}
+Roughly speaking it performs value function iteration on a discrete state space\footnote{The code used by \cite*{AldrichFernandezVillaverdeGallantRubioRamirez2011} and described at \href{http://www.parallelecon.com/vfi/}{parallelecon.com/vfi/} is similar, but not exactly the same, as the VFI algorithm used by the Toolkit.}. To handle multiple dimensions it vectorizes them.
+
+\subsection{Theory Behind These Methods}
+For a discussion of the theory behind Value function iteration see \cite*{SLP1989}. For a discussion of solving Value function iteration by discrete state space approximation see \cite{Burnside2001}, in particular part 5.4.2; this also contains a discussion of how to choose grids. \cite*{KirkbyVFIErrors} provides proof that the discretized value function iteration converges to true solution (for value fn and policy fn) under very general conditions. \cite*{KirkbyHeteroErrors} extends this to general equilibrium of heterogeneous agent models of Bewley-Huggett-Aiyagari class.
+
+\section{Getting Started} \label{sec:GettingStarted}
+To use this toolkit just download it and put the folder 'VFIToolkit' on your computer. To be able to call the commands/functions that make up the toolkit you have to add the 'VFIToolkit' folder to the 'path's known to Matlab so that it can find them. There are two ways to do this: (i) in Matlab use the 'Current Folder' to navigate to where you have the 'VFIToolkit' folder, right-click on the 'VFIToolkit' folder and select 'Add to path$>$Selected Folder and Subfolders'; (ii) add the line $addpath(genpath('path/Toolkit'))$ at the top of your codes, replacing $path$ with whereever you saved the 'VFIToolkit' folder (if it is in the same folder as your code you can replace $path$ with a dot, ie. $./VFIToolkit$).
+
+Now that Matlab knows where to find the toolkit you are ready to go. 
+
+\section{Infinite Horizon}
+
+\subsection{Infinite Horizon Value Function Iteration: Case 1} \label{sec:VFI_Case1}
+\input{./Sections/VFI_InfHorz.tex}
+
+% \section{Infinite Horizon Value Function Iteration: Case 2}
+% \input{./Sections/VFI_InfHorz_Case2.tex}
+
+\section{Calculating Stationary Distributions}
+\input{./Sections/AgentDist_InfHorz.tex}
+
+\section{Stationary General Equilibrium of Heterogeneous Agent Models} \label{sec:BHAmodel_GE}
+\input{./Sections/GenEqm_InfHorz.tex}
+
+\section{Transition Path for Heterogeneous Agent Models}
+\input{./Sections/TransPath_InfHorz.tex}
+
+\newpage
+\section{Finite Horizon Value Function Iteration: Case 1} \label{sec:VFI_Case1_FHorz}
+\input{./Sections/VFI_FHorz.tex}
+
+\section{Calculating Stationary Distributions}
+\input{./Sections/AgentDist_FHorz.tex}
+
+
+\section{Stationary General Equilibrium of OLG Models} \label{sec:OLGmodel_GE}
+\input{./Sections/GenEqm_FHorz.tex}
+
+\newpage
+\section{Finite Horizon Tools: Simulate Panel Data and Life Cycle Profiles} \label{sec:FHorz_PanelLifeCycle}
+\input{./Sections/PanelData_LCP_FHorz.tex}
+
+\newpage
+\section{Transition Path for OLG models}
+\input{./Sections/TransPath_FHorz.tex}
+
+% \newpage
+% \section{OLG models with 'Age-Dependent-Grids'} \label{sec:agedepgrids}
+% \input{./Sections/AgeDepGrids_FHorz.tex}
+
+\newpage
+\section{Examples} \label{sec:examples}
+The examples \ref{example:StochasticNeoclassicalGrowth} and \ref{example:BasicRBC} provide two basic examples of how to set up and call the value function iteration.
+
+The example \ref{example:FHorzStochConsSavings} and provides a basic example of how to set up and call the finite horizon value function iteration.
+
+The codes implementing these and other examples can be found at \href{https://github.com/vfitoolkit/vfitoolkit-matlab-examples}{github.com/vfitoolkit/vfitoolkit-matlab-examples}, you can find codes using the VFI Toolkit to replicate some classic papers at \href{https://github.com/vfitoolkit/vfitoolkit-matlab-replication}{github.com/vfitoolkit/vfitoolkit-matlab-replication}.
+These replictions include doing things like simulating time series, computing standard business cycle statistics, and solving heterogeneous agent models with general equilibrium.
+
+\subsection{Stochastic Neoclassical Growth Model (Diaz-Gimenez, 2001)} \label{example:StochasticNeoclassicalGrowth}
+\input{./Examples/Example_StochasticNeoClassicalGrowth}
+\newpage
+
+\subsection{Basic Real Business Cycle Model} \label{example:BasicRBC}
+\input{./Examples/Example_BasicRBC}
+\newpage
+
+\subsection{Finite Horizon Stochastic Consumption Savings Model} \label{example:FHorzStochConsSavings}
+\input{./Examples/Example_FHorzStochConsSavings}
+\newpage
+
+\bibliographystyle{plainnat}
+\bibliography{/home/kmarshallbanana/Dropbox/RDKbiblio.bib}
+
+\newpage
+
+\appendix
+
+\section{Markov Chains: Theory} \label{appendix:MarkovChains}
+\input{./Appendices/MarkovChains}
+\newpage
+
+\section{Markov Chains: Some Toolkit Elements}
+This section mentions a couple of commands that can be useful with Markov chains. Not described here are various discretiztion procedures: \href{https://github.com/vfitoolkit/VFIToolkit-matlab/tree/master/DiscretizationMethods}{https://github.com/vfitoolkit/VFIToolkit-matlab/tree/master/DiscretizationMethods}
+
+\subsection{MarkovChainMoments:}
+For the markov chain $z$ defined by the states $z\_{}grid$ and the transition matrix $pi\_{}z$ (row $i$ column $j$ gives the transition probability of going from state $i$ this period to state $j$ next period). The command
+\\ \indent \textcolor{RoyalBlue}{[z\_{}mean,z\_{}variance,z\_{}corr,z\_{}statdist]=MarkovChainMoments(z\_{}grid,pi\_{}z,T, Tolerance)}
+\\\ gives the mean, variance, and correlation of the markov chain, as well as it's stationary distribution. $Tolerance$ determines how strict to be in finding the stationary distribution. $T$ is needed as the correlation is determined by simulating the process (for $T$ periods).
+\\ Note that should you then wish to calculate the expectation of any function of $z$, $E[f(z)]$, it will simply be $f(z\_{}grid')*z\_{}statdist$. So for example the mean, $E[z]$, is actually just $z\_{}grid'*z\_{}statdist$; while $E[exp(z)]$ is $exp(z\_{}grid')*z\_{}statdist$.
+
+\newpage
+
+% \section{Tauchen Method} \label{appendix:TauchenMethod}
+% \input{./Appendices/TauchenMethod}
+% \newpage
+
+\section{Howards Improvement Algorithm (for Infinite Horizon Value Function Iteration)}
+Howards improvement algorithm is not used by the infinite horizon value function iteration codes for the first couple of iterations as it can otherwise lead to 'contamination' ofthe -Inf elements. It is set automatically to kick in just after this point (ie. once number of -Inf elements appears stable, this is when $currdist$ is finite ($<$1), this slowed some applications (in which it didn't matter when it kicked in) but avoids what can otherwise be a fatal error. It is my experience that the greatest speed gains come from choosing $Howards$ to be something in the range of $80$ to $100$, hence the default value of $80$. To ensure that Howards Improvement Algorithm does not interfere with the robustness of the algorithm convergence it is turned off after a number of uses (this is not just a theoretical issue, it can break convergence with small grids).
+
+Turning off Howards Improvement Algorithm (which toolkit does automatically) is essential if you plan to use that solution for the final value function in a general equilibrium transition path computation. (See pg 15 of \cite*{KirkbyBHATransitions} on transition paths for practical example of what goes wrong otherwise). Proofs that Howards Improvement Algorithm does not interfere with the convergence of the value function iteration are technically correct but not practically relevant: they are based on 'asymptotics' which the algorithm will never actually reach. The issue can be seen looking at second last line of proof in Stachurski textbook, the proof shows that Howards' won't matter, but this depends on using Howards an infinite number of times at each iteration of the value function, while in practice you will obviously only ever do a finite number of iterations.
+
+\newpage
+
+\section{StationaryDist Sub-commands} \label{appendix:StationaryDist}
+\input{./Appendices/StationaryDist_SubCommands}
+\newpage
+
+\section{Some Issues to be Aware Of}
+\subsection{A Warning on 'Tolerance' and Grid Sizes}
+The toolkit provides feedback on the occurance of various errors that may occour. One thing it will not warn you of however (other than obvious things such as incorrect values in the return function matrix) is that if your grids are too rough in comparison to the value you have choosen for Tolerance then it will be impossible for that tolerance level to be reached and the code will never end. This will be evident in the feedback the toolkit provides whilst running in $verbose=1$ mode as the 'currdist' will begin repeating the same values (or series of values) instead of continuing to converge to zero. In practice I have almost never had this problem, but I mention it just in case.
+
+\subsection{Poorly Chosen Grids}
+Another problem the toolkit does not tell you about is if your model tries to leave the grid (eg. say your grid has a max capital level of 4, but agents with a capital level of 4 this period want to choose a capital level of 4.2 for next period). This can be checked for simply by looking at the output of the policy functions. If people do not choose to move away from the edge, then you may have this error.
+
+In any case it is always worth taking a close look at the value function and policy function matrixes generated by the code to make sure they make sense as a check that you have defined all the inputs correctly (eg. look for things like higher utility in the 'good' states, utility increasing in asset  holdings, not too many times that people choose to stay in their current endogenous state (this may be a signal your grid may be too coarse), etc.). An alternative way is to check for mass at the edges of grids in the steady-state distributions.
+
+\newpage
+
+% \subsection{Hansen (1985) - Indivisible Labor and Business Cycles} \label{example:Hansen1985}
+% \input{./Examples/Example_Hansen1985}
+% \newpage
+% 
+% \subsection{Imrohoroglu (1989) - Cost of Business Cycles with Indivisibilities and Liquidity Constraints} \label{example:Imrohoroglu1989}
+% \input{./Examples/Example_Imrohoroglu1989}
+% \newpage
+% 
+% \subsection{D\'iaz-G\'imenez, Prescott, Alvarez, and Fitzgerald (1992) - Banking in Computable General Equilibrium Economies} \label{example:DiazGimenezEtAl1992}
+% \newpage
+
+% \subsection{Huggett (1993) - The Risk-free Rate in heterogeneous-Agent Incomplete-Insurance Economies} \label{example:Huggett1993}
+% \input{./Examples/Example_Huggett1993}
+% \newpage
+% 
+% \subsection{Aiyagari (1994) - Uninsured Idiosyncratic Risk and Aggregate Saving} \label{example:Aiyagari1994}
+% %\input{./Examples/Example_Aiyagari1994}
+% \newpage
+
+
+
+
+
+
+
+\end{document}

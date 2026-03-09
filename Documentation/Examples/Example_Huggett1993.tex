@@ -1,0 +1,29 @@
+%\documentclass[DiscStateSpaceToolkit.tex]{subfiles} 
+%\begin{document}
+ 
+Hugget (1993) models a pure exchange economy to look at the question of how idiosyncratic shocks, incomplete markets, 
+and borrowing constraints interact and their possible effects on interest rates.
+
+In this model agents agents aim to maximize their consumption by saving \& borrowing (pure-exchange) assets (ie. by lending
+and borrowing from one another). The amount they can borrow is limited (to roughly one years income, $\underline{a}=-5.3$; the
+model is calibrated to six-periods per year). In the aggregate these individual savings and borrowing should all balance out (and
+determine the aggregate interest rate).
+
+Thus, the agents problem is to chose consumption $c$ and assets $a$ to maximize
+\begin{align*}
+ E[\sum_{t=0}^{\infty} \beta^t \frac{c^{1-\sigma}}{1-\sigma}]
+\end{align*}
+subject to a budget constraint and no-borrowing constraint
+\begin{align*}
+ c_t+q a_{t+1}=a_t+e_t \\
+ c_t \geq 0, \text{ } a_{t+1} \geq \underline{a}
+\end{align*}
+The endowments are assumed to follow a two state markov chain $e$. 
+The market clearing condition is thus that $\int a d\mu= 0$, where $\mu$ is the equilibrium measure over agent types.
+
+The code implementing the model is following, loosely speaking it recreates the elements of Tables 1 \& 2 of that paper.
+
+
+\lstinputlisting[language=Matlab]{./Examples/MatlabCodes/Huggett1993.m}
+
+%\end{document}

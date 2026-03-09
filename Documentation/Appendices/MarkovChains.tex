@@ -1,0 +1,45 @@
+This section explains a couple of useful things about Markov chains. When not otherwise specified Markov chains are assumed to be of first-order. 
+
+Let us start with a definition: $q_t$ is a (discrete-time) $n$-state first-order Markov chain if at any time $t$, $q_t$ takes a value in $\{q_1,...,q_n\}$, and
+the probability that $q$ takes the value $q_j$ at time $t+1$ depends only on the state of $q$ at time $t$, that is $Pr(q_{t+1}=q_j)=Pr(q_{t+1}=q_i | q_t=q_j)$.
+
+The transition matrix of $q$ is defined as the $n$-by-$n$ matrix $\Pi^q=[\pi^q_{ij}]$, where $\pi^q_{ij}=Pr(q_{t+1}=q_i | q_t=p_j)$. Thus the element of the
+transition matrix in row $i$ and column $j$ gives the probability that the state tomorrow is $q_j$ given that the state today is $q_i$.
+
+For a more comprehensive treatment of Markov Chains see SLP chapters 8, 11, \& 12; Sargent \& Ljungquist chapter 2; or Grimmett \& Stirzaker - Probability
+and Random Processes.
+
+\subsection{How to turn a Markov chain with two variables into a single variable Markov chain}
+Say you have a Markov chain with two variables, $q$ \& $p$ (the most common macroeconomic application for this is in heterogenous models, where $q$ is an 
+idiosyncratic state $s$ and $p$ is the aggregate state $z$). Let $q$ take the states $q_1,...q_n$, and $p$ take the states $p_1,...,p_m$. We start with 
+the simple example of how to combine the two when their transitions are completely independent of each other so as to illustrate the concepts and then 
+treat the general case.
+
+When $q$ and $p$ are independent Markov chains, $Pr(q_{t+1}=q_j)=Pr(q_{t+1}=q_i | q_t=q_j)=\pi^q_{ij}$ $\forall i,j=1,...n$ and 
+$Pr(p_{t+1}=p_j)=Pr(p_{t+1}=p_i | p_t=p_j)=\pi^p_{ij}$ $\forall i,j=1,...m$, then we can define a new single-variable Markov chain $r$
+simply by taking the Kronecker Product of $q$ and $p$. Thus, $r$ will have $n$ times $m$ states, $[r_1,..,r_{nm}]'=[q_1,...q_n]'\otimes[p_1,...p_m]'$, and it's transition matrix
+will be the Kronecker Product of their transition matrices; $\Pi^r=\Pi^q \otimes \Pi^p$. For the definition of the Kronecker product of two matrices see
+wikipedia.
+
+For the vector $(q,p)$ to be a (first-order) Markov chain, at least one of $q$ and $p$ must be independent of the current period value of the other. Thus 
+we assume, without loss of generality, that $q_t$ evolves according to the transformation matrix defined by $Pr(q_t)=Pr(q_t | q_{t-1},p_{t-1})$, while $p_t$ 
+has the transformation matrix $Pr(p_t)=Pr(q_t, q_{t-1}, p_{t-1})$\footnote{Note that here I switch from describing Markov chains as $t+1 |t$ to $t|t-1$, the
+difference is purely cosmetic.}. Again we can define a Markov chain $r$ will have $n$ times $m$ states by $[r_1,..,r_{nm}]'=[q_1,...q_n]'\otimes[p_1,...p_m]'$.
+The transition matrix however is now more complicated; rather than provide a general formula you are referred to the examples of Imrohoroglu (1989) and
+OTHEREXAMPLE which illustrate some of the common cases you may wish to model.
+
+If you have three or more variables in vector of the first-order Markov chain you can reduce this to a scalar first-order Markov chain simply by iteratively
+combining pairs. For example with three variables, $(q^1, q^2, q^3)$, start by first defining $r^1$ as the combination of $q^1$ \& $q^2$ (combining them as
+described above), and then $r$ as the combination of $r^1$ and $q^3$.
+
+
+\subsection{How to turn a second-order Markov chain into a first-order Markov chain}
+Suppose that $q$, with states $q_1,...q_n$ is a second-order Markov chain, that is $Pr(q_{t+1}=q_i)=Pr(q_{t+1}=q_i|q_t=q_j, q_{t-1}=q_k)
+\neq Pr(q_{t+1}=q_i|q_t=q_j)$. Consider now the vector $(q_{t+1}, q_t)$. It turns out that this vector is in fact a vector first-order Markov
+chain (define this periods state $(q_{t+1}, q_t)$ in terms of last periods state $(q_t,q_{t-1})$ by defining this periods $q_{t+1}$ as a function of
+last periods $q_t$ \& $q_{t-1}$ following the original second-order Markov chain, and define this periods $q_t$ as being last periods $q_t$). Now just
+combine the two elements of this first-order vector Markov chain, $(q_{t+1}, q_t)$, into a scalar first-order Markov chain $r$ in the same way as we
+did above, that is by the Kronecker product.
+
+For third- and higher-order Markov chains simply turn them into three- and higher-element first-order vector Markov chains, and then combine them 
+into scalars by repeated pairwise Kronecker products as above. 

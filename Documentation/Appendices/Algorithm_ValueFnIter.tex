@@ -1,0 +1,24 @@
+This sections describes the algorithms used by the Value Function Iteration commands. It discusses some of the choices made in the
+specific ordering of the commands, as well as how some of the options differ. Covers both the case 1 and case 2 codes, for cpu and gpu.
+
+The focus is on psuedocodes of the commands
+\begin{itemize}
+ \item \textit{TauchenMethod\_{}Param}: Generates a markov chain approximation for AR(1) process defined by the inputed parameters.
+\end{itemize}
+
+\subsection{On the GPU}
+
+
+
+\subsubsection{Low Memory}
+
+\subsection{On the CPU}
+Implementation on the CPU is similar, but with two main differences. Firstly, rather than giving the Return Function arguement as a
+function, it is possible to instead give the Return Function arguement as a matrix. Secondly, the toolkit runs the for-loop over 
+$z\_{}c=1:n\_{}z$ (over the z-grid) in parallel on the CPUs (unless $vfoptions.parallel=0$, in which case this is disabled).
+
+\subsection{Howards Improvement Iteration}
+
+
+
+

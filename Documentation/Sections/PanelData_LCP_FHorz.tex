@@ -1,0 +1,101 @@
+Commands for simulating panel data and life-cycle profiles from a Finite Horizon Value Fn problem are given by \\
+\textcolor{RoyalBlue}{SimPanelValues=SimPanelValues\_{}FHorz\_{}Case1(InitialDist, Policy, FnsToEvaluate,} \\
+\indent \indent \textcolor{RoyalBlue}{FnsToEvaluateParamNames, Parameters, n\_{}d, n\_{}a, n\_{}z, N\_{}j, d\_{}grid, a\_{}grid, z\_{}grid,}\\
+\indent \indent \textcolor{RoyalBlue}{pi\_{}z, [simoptions]);} \\
+and \\
+\textcolor{RoyalBlue}{SimLifeCycleProfiles=SimLifeCycleProfiles\_{}FHorz\_{}Case1(InitialDist, Policy, FnsToEvaluate,} \\
+\indent \indent \textcolor{RoyalBlue}{FnsToEvaluateParamNames, Parameters, n\_{}d, n\_{}a, n\_{}z, N\_{}j, d\_{}grid, a\_{}grid, z\_{}grid,}\\
+\indent \indent \textcolor{RoyalBlue}{pi\_{}z, [simoptions]);} \\
+This section describes the simulations involved, the inputs and outputs, and provides some further info on using these commands.
+They are covered together here as their inputs and functionality have much in common.
+
+Both of these commands are intended to be run based on a $Policy$ that has been output by a $ValueFnIter\_{}FHorz\_{}Case1()$ command.
+$PType$ versions of these commands also exist that allow for different agent permanent/fixed types.
+Many of the inputs are simply the same as those originally used to solve for $Policy$, namely $Parameters$, $n\_{}d$, $n\_{}a$, $n\_{}z$, $N\_{}j$, $d\_{}grid$, $a\_{}grid$, $z\_{}grid$, $pi\_{}z$,
+and so these are not redescribed here.
+
+$simoptions$ allows you to set some internal options (including parallization), if $simoptions$ is not used all options will revert to their default values.
+
+The forms that each of these inputs and outputs takes are now described in detail. The best way to understand how to use the
+command may however be to just go straight to the examples; in particular the replication of \cite*{HubbardSkinnerZeldes1994}.
+
+\subsection{Inputs and Outputs}
+To use the toolkit to solve problems of this sort the following steps must first be made.
+\begin{itemize}
+ \item To be able to simulate a panel you must first declare in what state agents will be 'born'. This is the
+   role of $InitialDist$. Typically it will be a probability distribution across the state space $(a,z)$ at age $j=1$.
+   This will take the form of a matrix of dimensions $n\_{}a-by-n\_{}z$ the elements of which sum to one. \\
+   \textcolor{RoyalBlue}{InitialDist=zeros(n\_{}a,n\_{}z); InitialDist(1,ceil(n\_{}z)/2)=1;} \\
+   (In this example it is assumed agents are born with least number of assets ($n\_{}a$ one-dimensional) and median values of the shocks.) \\
+   ($InitialDist$ is allowed to further depend on $j$, in which case it will be $n\_{}a-by-n\_{}z-by-N\_{}j$. When the $N\_{}j$ dimension
+   is not declare it is simply assumed by default that all agents are 'born' with $j=1$.)
+ \item The policy function $Policy$ is simply that created as an output by $ValueFnIter\_{}Case1\_{}FHorz()$. It contains the 'indexes' for
+   the optimal policy (choices for $d$ and $a'$ variables) at each point in the discretized state space.
+ \item Define functions for the variables you wish to create panel data (or life-cycle profiles) for.
+   Store all these functions together. \\
+   eg., for a panel which is just the values of the endogenous state, then \\
+   \textcolor{RoyalBlue}{FnsToEvaluateFn\_{}1 = @(aprime\_{}val,a\_{}val,s\_{}val) a\_{}val;} \\
+   (You always need the $@(...)$ defined either in this way, or with $@(d\_{}val,...)$ where appropriate. You also need to include parameters where appropriate.) \\
+   Define the names of any parameters used to evaluate the aggregate variables. \\
+   \textcolor{RoyalBlue}{FnsToEvaluateParamNames(1).Names=\{\};} \\
+   (In our example there were none, but an example might be that you want to evaluate tax revenue, which is a tax rate parameter times an endogenous state variable, then the tax rate
+    parameter name will be given here.) \\
+   You then store all of these together: \\
+   \textcolor{RoyalBlue}{FnsToEvaluate=\{FnsToEvaluateFn\_{}1\};}
+ \item For how to declare $Parameters$, $n\_{}d$, $n\_{}a$, $n\_{}z$, $N\_{}j$, $d\_{}grid$, $a\_{}grid$, $z\_{}grid$, $pi\_{}z$
+   check the descriptions of the finite horizon value function iteration command in Section \ref{sec:VFI_Case1_FHorz}.
+\end{itemize}
+
+That covers all of the objects that must be created, the only thing left to do is simply call the commands. \\
+\textcolor{RoyalBlue}{SimPanelValues=SimPanelValues\_{}FHorz\_{}Case1(InitialDist, Policy, FnsToEvaluate,} \\
+\indent \indent \textcolor{RoyalBlue}{FnsToEvaluateParamNames, Parameters, n\_{}d, n\_{}a, n\_{}z, N\_{}j, d\_{}grid, a\_{}grid, z\_{}grid,}\\
+\indent \indent \textcolor{RoyalBlue}{pi\_{}z, [simoptions]);} \\
+and \\
+\textcolor{RoyalBlue}{SimLifeCycleProfiles=SimLifeCycleProfiles\_{}FHorz\_{}Case1(InitialDist, Policy, FnsToEvaluate,} \\
+\indent \indent \textcolor{RoyalBlue}{FnsToEvaluateParamNames, Parameters, n\_{}d, n\_{}a, n\_{}z, N\_{}j, d\_{}grid, a\_{}grid, z\_{}grid,}\\
+\indent \indent \textcolor{RoyalBlue}{pi\_{}z, [simoptions]);} \\
+
+The outputs are
+\begin{itemize}
+ \item $SimPanelValues$: A simulated panel data set containing the values of the 'FnsToEvaluate'. It will be a matrix of size [$length(FnsToEvaluate)$,N\_{}j, $NSims$]
+    and at each point it will be the value of the 'FnsToEvaluateFn' for an age and individual,
+ \item $SimLifeCycleProfiles$: Creates life-cycle profiles for the values of the 'FnsToEvaluate'. It will be a matrix of size [$length(FnsToEvaluate)$, N\_{}j, 23].
+    The first dimension indexes the variable, the second is the age, and the third indexes mean/median/ventile.
+    For example, $SimLifeCycleProfiles(3,:,1)$ will be the life-cycle profile for the mean of the third variable in 'FnsToEvaluate'. \\
+    \small ($simoptions.lifecyclepercentiles=20$ is ventiles,
+    and can be used to control the number of percentiles reported (always including the min and max values), so $simoptions.lifecyclepercentiles=4$
+    will return quartiles, and $simoptions.lifecyclepercentiles=0$ then only the mean and median will be returned.)
+    \normalsize
+\end{itemize}
+
+\subsection{Some further remarks}
+\begin{itemize}
+ \item Models where $d$ is unnecessary (only $a'$ need be chosen): set $n\_{}d=0$ and $d\_{}grid=0$, the code will
+    take care of the rest.
+ \item $SimLifeCycleProfiles$ simply performs the same panel data simulation as $SimPanelValues$ but then returns the age-conditional mean (median/percentile/etc.)
+    rather than returning the actual panel simulation.
+ \item Panel simulation commands presently just ignore stochastic survivial probabilities (the value function and OLG commands do account for them).
+\end{itemize}
+
+\subsection{Options}
+Optionally you can also input a further argument, a structure called \textit{simoptions}, which allows you to set various internal options.
+Following is a list of the \textit{simoptions}, the values to which they are being set in this list are their default values.
+ \begin{itemize}
+  \item For reasons of speed simulations are always performed on CPU (or parallel CPUs). Setting $simoptions.parallel=2$ simply
+    means that the output will be transferred to the GPU before it is returned (and that inputs are assumed to be on
+    the GPU). \\
+    \textcolor{RoyalBlue}{simoptions.parallel=2}
+  \item If you want feedback set to one, else set to zero \\
+    \textcolor{RoyalBlue}{simoptions.verbose=0}
+  \item Number of periods for which each individual agent simulation lasts. \\
+    \textcolor{RoyalBlue}{simoptions.simperiods=N\_{}j}
+  \item Number of individual agents simulations that make up the panel data. \\
+    \textcolor{RoyalBlue}{simoptions.numbersims=10\^{}4} \\
+    (Note: Life-cycle profiles are themselves based on a simulated panel so this $simoptions$ is relevant)
+  \item Number of percentiles for which life-cycle profiles are given (not relevant to $SimPanelValues$ command),
+    in addition to the mean, median, and minimum (note that maximum will always be the p-th of the p percentiles) \\
+    \textcolor{RoyalBlue}{simoptions.lifecyclepercentiles=20;}
+\end{itemize}
+
+\subsection{Some Examples}
+See the replication of \cite*{HubbardSkinnerZeldes1994} at github: \href{https://github.com/vfitoolkit/vfitoolkit-matlab-replication/tree/master/HubbardSkinnerZeldes1994}{https://github.com/vfitoolkit/vfitoolkit-matlab-replication/tree/master/HubbardSkinnerZeldes1994}.

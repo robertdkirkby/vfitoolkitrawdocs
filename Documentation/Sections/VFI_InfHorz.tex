@@ -1,0 +1,138 @@
+The relevant command is \\
+\textcolor{RoyalBlue}{[V,Policy] = ValueFnIter\_{}Case1(V0, n\_{}d, n\_{}a, n\_{}z, d\_{}grid, a\_{}grid, z\_{}grid, pi\_{}z, } \\
+\indent \indent \textcolor{RoyalBlue}{ReturnFn, Parameters, DiscountFactorParamNames, ReturnFnParamNames, vfoptions);} \\
+This section describes the problem it solves, all the inputs and outputs, and provides some further info on using this command.
+
+The Case 1\footnote{The description of this as case 1 is chosen as it coincides exactly with the definition of case 1 for stochastic
+value function problems used in Chapter 8 \& 9 of Stokey, Lucas \& Prescott - Recursive Dynamic Economics (eg. pg. 260). In their
+notation this is any problem that can be written as $\textit{v}(x,z)=\sup_{y\in \Gamma(x,z)} \{ F(x,y,z) + \beta \int_Z
+\textit{v}(y,z')Q(z,dz')\}$} infinite-horizon value function iteration code can be used to solve any problem that
+can be written in the form
+\begin{equation*}
+ V(a,z)= \max_{d,a'} \{ F(d,a',a,z) + \beta E[V(a',z')|a,z] \}
+\end{equation*}
+subject to
+\begin{eqnarray*}
+ z'=\pi(z)
+\end{eqnarray*}
+where \\
+\begin{tabular} {l}
+ z $\equiv$ vector of exogenous state variables \\
+ a $\equiv$ vector of endogenous state variables \\
+ d $\equiv$ vector of decision variables
+\end{tabular} \\
+notice that any constraints on $d$, $a$, \& $a'$ can easily be incorporated into this framework by building them into the return function. Note that this
+case is only applicable to models in which it is possible to choose $a'$ directly; when this is not so Case 2 will be required.
+
+The main inputs the value function iteration command requires are the grids for $d$, $a$, and $z$; the discount rate; the transition matrix for $z$; and the
+return function $F$.
+
+It also requires to info on how many variables make up $d$, $a$ and $z$ (and the grids onto which they should be discretized).
+And it accepts an initial
+guess for the value function $V0$ (if you have a good guess this can make things faster).
+
+$vfoptions$ allows you to set some internal options (including parallization), if $vfoptions$ is not used all options will revert to their default values.
+
+The forms that each of these inputs and outputs takes are now described in detail. The best way to understand how to use the
+command may however be to just go straight to the examples; in particular those for the Stochastic NeoClassical Growth model
+(Appendix \ref{example:StochasticNeoclassicalGrowth}) and the Basic Real Business Cycle model (Appendix \ref{example:BasicRBC}).
+
+\subsection{Inputs and Outputs}
+To use the toolkit to solve problems of this sort the following steps must first be made.
+\begin{itemize}
+ \item Define $n\_{}a$, $n\_{}z$, and $n\_{}d$ as follows. $n\_{}a$ should be a row vector containing the number of grid points for each of the state variables in $a$;
+     so if there are two endogenous state variables the first of which can take two values, and the second of which can take ten values then $n\_{}a=[2,10];$.
+     $n\_{}d$ \& $n\_{}z$ should be defined analagously.
+ \item Create the (discrete state space) grids for each of the $d$, $a$ \& $z$ variables, \\
+    \textcolor{RoyalBlue}{a\_{}grid=linspace(0,2,100)'; d\_{}grid=linspace(0,1,100)'; z\_{}grid=[1;2;3];} \\
+       (They should be column vectors. If there are multiple variables they should be stacked column vectors)
+ \item Create the transition matrices for the exogenous $z$ variables\footnote{These must be so that the element in row $i$ and column
+     $j$ gives the probability of going from state $i$ this period to state $j$ next period. So each row must sum to one.} \\
+     \textcolor{RoyalBlue}{pi\_{}z=[0.3,0,3.0,4; 0.2,0.2,0.6; 0.1,0.2,0.7];} \\
+     (Often you will want to use the Tauchen Method to create $z\_{}grid$ and $pi\_{}z$)
+ \item Define the return function. This is the most complicated part of the setup. See the example codes applying the toolkit to some well known problems
+     later in this section for some illustrations of how to do this. It should be a Matlab function that takes as inputs various values for $(d,aprime,a,z)$
+     and outputs the corresponding value for the return function.\\
+     \textcolor{RoyalBlue}{ReturnFn=@(d,aprime,a,z) ReturnFunction\_{}AMatlabFunction}
+ \item Define the initial value function, the following one will always work as a default, but by making smart choices for this inital value function you can
+     cut the run time for the value function iteration. \\
+     \textcolor{RoyalBlue}{V0=ones(n\_{}a,n\_{}z);}
+ \item Pass a structure $Parameters$ containing all of the model parameters. \\
+     \textcolor{RoyalBlue}{Parameters.beta=0.96; Parameters.alpha=0.3;} \\
+     \textcolor{RoyalBlue}{Parameters.gamma=2; Parameters.delta=0.05;}
+ \item $ReturnFnParamNames$ is a cell containing the names of the parameters used by the ReturnFn (they must appear in same order as used by the ReturnFn). \\
+     \textcolor{RoyalBlue}{ReturnFnParamNames=$\{$'alpha','gamma','delta'$\}$}
+ \item $DiscountFactorParamNames$ is a cell containing the names of the discount factor parameter (it is also used for 'exoticpreferences' like Epstein-Zin). \\
+     \textcolor{RoyalBlue}{DiscountFactorParamNames=$\{$'beta'$\}$}
+\end{itemize}
+
+That covers all of the objects that must be created, the only thing left to do is simply call the value function iteration code and let it do it's thing. \\
+\textcolor{RoyalBlue}{[V,Policy] = ValueFnIter\_{}Case1(V0, n\_{}d, n\_{}a, n\_{}z, d\_{}grid, a\_{}grid, z\_{}grid, pi\_{}z, } \\
+\indent \indent \textcolor{RoyalBlue}{ReturnFn, Parameters, DiscountFactorParamNames, ReturnFnParamNames, [vfoptions]);}
+
+The outputs are
+\begin{itemize}
+ \item $V$: The value function evaluated on the grid (ie. on $a \times z$). It will be a matrix of size $[n_a,n_z]$ and at each point it will be the value of the value function evaluated
+    at the corresponding point $(a,z)$.
+ \item $Policy$: This will be a matrix of size $[length(n_d)+length(n_a), n_a, n_z]$. For each point $(a.z)$ the corresponding entries in $Policy$, namely $Policy(:,a,z)$ will be a vector containing
+    the optimal policy choices for $(d,a)$.\footnote{By default, $vfoptions.polindorval=1$, they will be the indexes, if you set $vfoptions.polindorval=2$ they will be the values.}
+\end{itemize}
+
+\subsection{Some further remarks}
+\begin{itemize}
+ \item Models where $d$ is unnecessary (only $a'$ need be chosen): set $n\_{}d=0$ and $d\_{}grid=0$ and don't put it into the return fn, the code will
+    take care of the rest (see eg. Example \ref{example:StochasticNeoclassicalGrowth}).
+ \item Often one may wish to define the grid for $z$ and it's transition matrix by the Tauschen method or something similar. The toolkit provides codes to
+    implement the Tauchen method, see \hyperref[appendix:TauchenMethod]{Appendix \ref*{appendix:TauchenMethod}}
+ \item There is no problem with making the transitions of certain exogenous state variables dependent of the values taken by other exogenous state variables.
+    This can be done in the obvious way; see \hyperref[appendix:MarkovChains]{Appendix \ref*{appendix:MarkovChains}}. (For example: if there are two exogenous variables $z^a$ \& $z^b$ one can have $Pr(z^b_{t+1}=z^b_j)=
+    Pr(z^b_{t+1}=z^b_j | z^b_t)$ and $Pr(z^a_{t+1}=z^a_j)=Pr(z^a_{t+1}=z^a_j | z^a_t, z^b_{t+1}, z^b_t)$.)
+ \item Likewise, dependence of choices and expectations on more than just this period (ie. also last period and the one before, etc.) can also
+    be done in the usual way for Markov chains (see \hyperref[appendix:MarkovChains]{Appendix \ref*{appendix:MarkovChains}}).
+ \item Models with no uncertainty: these are easy to do simply by setting $n\_{}z=1$ and $pi\_{}z=1$.
+\end{itemize}
+
+\subsection{Options}
+Optionally you can also input a further argument, a structure called \textit{vfoptions}, which allows you to set various internal options. Perhaps
+the most important of these is \textit{vfoptions.parallel} which can be used get the codes to run parallely across multiple CPUs (see the examples).
+Following is a list of the \textit{vfoptions}, the values to which they are being set in this list are their default values.
+ \begin{itemize}
+ \item Define the tolerance level to which you wish the value function convergence to reach \\
+    \textcolor{RoyalBlue}{vfoptions.tolerance=10\^{}(-9)}
+  \item Decide whether you want the optimal policy function to be in the form of the grid indexes that correspond to the optimal policy, or to their grid values. \\
+    \textcolor{RoyalBlue}{vfoptions.polindorval=1} \\
+      (Set vfoptions.polindorval=1 to get indexes, vfoptions.polindorval=2 to get values.)
+  \item Decide whether or not to use Howards improvement algorithm (recommend yes) \\
+    \textcolor{RoyalBlue}{vfoptions.howards=80} \\
+      (Set vfoptions.howards=0 to not use it. Otherwise variable is number of time to use Howards improvement algorithms, about 80 to 100
+      seems to give best speed improvements.)
+  \item If you want to parallelize the code on the GPU set to two, parallelize on CPU set to one, single core on CPU set as zero \\
+    \textcolor{RoyalBlue}{vfoptions.parallel=2}
+  \item If you want feedback set to one, else set to zero \\
+    \textcolor{RoyalBlue}{vfoptions.verbose=0} \\
+      (Feedback includes some info on how convergence is going and on the run times of various parts of the code)
+  \item When running codes on CPU it is often faster to input the Return Function as a matrix, rather than as a function. \\
+    \textcolor{RoyalBlue}{vfoptions.returnmatrix=0} \\
+    (By default it assumes you have input a function. Setting $vfoptions.returnmatrix=1$ tells the codes you have inputed it as a matrix. When using GPU just ignore this option.)
+  \item By default the toolkit assumes standard von-Neumann-Morgenstern preferences. It is possible to overrule this and use 'exotic' preferences instead, if you do this then $DiscountFactorParamNames$ is
+    used to pass the needed additional parameters names. For example, can use Epstein-Zin parameters. \\
+    \textcolor{RoyalBlue}{vfoptions.exoticpreferences=0}
+  \item When using graphics cards with single-precision floating point numbers\footnote{NVIDIA deliberately handicap most gaming GPUs to single-precision so they can charge a higher price for 'scientific computing'
+    GPUs with double-precision floating point numbers.} I once had a problem due to rounding errors, so that the 'Policy' instead of containing all integer values contained some numbers
+    that were $10^{-15}$ away from being an integer. Setting this option to 1 forces them all to round to integers. Typically this is unnecessary and in principle could cause unintended errors, so is off by default. \\
+    \textcolor{RoyalBlue}{vfoptions.policy\_{}forceintegertype=0}
+%   \item Decide whether to use the 'low memory' option (I recommend not using it, it is to slow to be of much use). Not using this option is substantially
+%       faster, but can easily run out of memory. Thus you should only
+%       choose to set the low memory option to one if not doing so will generate an 'out of memory' error. The 'low memory' option is only really any good if you
+%       are using parallelization (eg. vfoptions.parallel=1); otherwise it is just too slow. \\
+%       \textcolor{RoyalBlue}{vfoptions.lowmemory=0} \\
+%        (Set vfoptions.lowmemory=0 for much faster but memory intensive codes, vfoptions.lowmemory=1 to reduce memory use.) \\
+  \item $piz\_{}strictonrowsaddingtoone$ option determines strictness of the internal check that the rows of $pi\_{}z$, the transition matrix for exogenous shocks,. The default (value of 0) is to make sure row sums are within $10^{-13}$ of 1, by setting value of 1 the check is instead that the row sums are exactly equal to 1. To strict version is desirable, but often fails due to machine precision errors, and so have used the slightly less strict $10^{-13}$ as default.
+\end{itemize}
+
+
+\subsection{Some Examples}
+\subsection*{\hyperref[example:StochasticNeoclassicalGrowth]{Example: Stochastic Neoclassical Growth Model}}
+\subsection*{\hyperref[example:BasicRBC]{Example: Basic Real Business Cycle Model}}
+% \subsection*{\hyperref[example:Hansen1985]{Example: Hansen (1985) - Indivisible Labor and Business Cycles}}
+
